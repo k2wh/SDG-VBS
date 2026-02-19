@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { projetos } from '../services/api';
+import { CustomSelect } from './FormField';
 
 export default function ProjectSelector({ projetoAtivo, setProjetoAtivo }) {
   const [lista, setLista] = useState([]);
@@ -17,19 +18,23 @@ export default function ProjectSelector({ projetoAtivo, setProjetoAtivo }) {
     return () => window.removeEventListener('projetos-updated', refreshList);
   }, []);
 
+  const options = lista.map((p) => ({
+    value: p.id,
+    label: `${p.codigo} - ${p.nome}`,
+  }));
+
   return (
-    <div className="flex items-center gap-2">
-      <label className="text-sm text-gray-500 font-medium">Projeto:</label>
-      <select
-        value={projetoAtivo || ''}
-        onChange={(e) => setProjetoAtivo(e.target.value ? Number(e.target.value) : null)}
-        className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-48"
-      >
-        <option value="">Selecione um projeto</option>
-        {lista.map((p) => (
-          <option key={p.id} value={p.id}>{p.codigo} - {p.nome}</option>
-        ))}
-      </select>
+    <div className="flex items-center gap-2.5">
+      <label className="text-sm text-gray-500 font-medium whitespace-nowrap">Projeto:</label>
+      <div className="min-w-56">
+        <CustomSelect
+          value={projetoAtivo || ''}
+          onChange={(val) => setProjetoAtivo(val ? Number(val) : null)}
+          options={options}
+          placeholder="Selecione um projeto"
+          compact
+        />
+      </div>
     </div>
   );
 }

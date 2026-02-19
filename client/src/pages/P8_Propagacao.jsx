@@ -69,7 +69,7 @@ export default function P8_Propagacao({ projetoAtivo }) {
     <div>
       <StepHeader numero={8} titulo="Propagação" descricao="Análise da propagação e evolução dos benefícios" />
 
-      <div className="mb-4">
+      <div className="mb-4 flex justify-end">
         <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ ...empty }); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
           {showForm ? 'Cancelar' : '+ Nova Propagação'}
@@ -92,7 +92,7 @@ export default function P8_Propagacao({ projetoAtivo }) {
             <FormField label="Efeitos Colaterais" type="textarea" value={form.efeitos_colaterais} onChange={(v) => setForm({ ...form, efeitos_colaterais: v })} rows={2} />
             <FormField label="Observações" type="textarea" value={form.observacoes} onChange={(v) => setForm({ ...form, observacoes: v })} rows={2} />
           </div>
-          <div className="mt-4">
+          <div className="mt-4 flex justify-end">
             <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
               {editId ? 'Salvar' : 'Cadastrar'}
             </button>

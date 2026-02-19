@@ -54,7 +54,7 @@ export default function P3_Gestores() {
     <div>
       <StepHeader numero={3} titulo="Gestores" descricao="Cadastro de gestores, patrocinadores e responsáveis" />
 
-      <div className="mb-4">
+      <div className="mb-4 flex justify-end">
         <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ ...empty }); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors">
           {showForm ? 'Cancelar' : '+ Novo Gestor'}
@@ -71,7 +71,7 @@ export default function P3_Gestores() {
             <FormField label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
             <FormField label="Telefone" value={form.telefone} onChange={(v) => setForm({ ...form, telefone: v })} mask="telefone" />
           </div>
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex justify-end">
             <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
               {editId ? 'Salvar Alterações' : 'Cadastrar'}
             </button>

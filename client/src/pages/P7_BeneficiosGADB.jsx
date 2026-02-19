@@ -71,7 +71,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
     <div>
       <StepHeader numero={7} titulo="GADB Benefícios" descricao="Identificação e definição dos benefícios" />
 
-      <div className="mb-4">
+      <div className="mb-4 flex justify-end">
         <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ ...empty }); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
           {showForm ? 'Cancelar' : '+ Novo Benefício'}
@@ -99,7 +99,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
             <FormField label="Como Realizar" type="textarea" value={form.como_realizar} onChange={(v) => setForm({ ...form, como_realizar: v })} rows={2} />
             <FormField label="Riscos" type="textarea" value={form.riscos} onChange={(v) => setForm({ ...form, riscos: v })} rows={2} />
           </div>
-          <div className="mt-4">
+          <div className="mt-4 flex justify-end">
             <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
               {editId ? 'Salvar' : 'Cadastrar'}
             </button>

@@ -71,7 +71,7 @@ export default function P9_Sinergia({ projetoAtivo }) {
     <div>
       <StepHeader numero={9} titulo="Sinergias" descricao="Análise de sinergia entre benefícios" />
 
-      <div className="mb-4">
+      <div className="mb-4 flex justify-end">
         <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ ...empty }); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
           {showForm ? 'Cancelar' : '+ Nova Sinergia'}
@@ -91,7 +91,7 @@ export default function P9_Sinergia({ projetoAtivo }) {
             <FormField label="Descrição" type="textarea" value={form.descricao} onChange={(v) => setForm({ ...form, descricao: v })} rows={2} />
             <FormField label="Impacto na Maximização do Valor" type="textarea" value={form.impacto} onChange={(v) => setForm({ ...form, impacto: v })} rows={2} />
           </div>
-          <div className="mt-4">
+          <div className="mt-4 flex justify-end">
             <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
               {editId ? 'Salvar' : 'Cadastrar'}
             </button>

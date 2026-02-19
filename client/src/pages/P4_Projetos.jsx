@@ -75,7 +75,7 @@ export default function P4_Projetos({ setProjetoAtivo }) {
     <div>
       <StepHeader numero={4} titulo="Projetos" descricao="Cadastro de projetos — elemento central do sistema" />
 
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex justify-end">
         <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ ...empty }); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors">
           {showForm ? 'Cancelar' : '+ Novo Projeto'}
@@ -103,7 +103,7 @@ export default function P4_Projetos({ setProjetoAtivo }) {
           <div className="mt-4">
             <FormField label="Objetivo" type="textarea" value={form.objetivo} onChange={(v) => setForm({ ...form, objetivo: v })} />
           </div>
-          <div className="mt-4">
+          <div className="mt-4 flex justify-end">
             <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
               {editId ? 'Salvar Alterações' : 'Cadastrar'}
             </button>

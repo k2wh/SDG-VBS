@@ -50,7 +50,7 @@ export default function P2_Organizacao() {
     <div>
       <StepHeader numero={2} titulo="Organização" descricao="Registro da organização e resumo do plano estratégico" />
 
-      <div className="mb-4">
+      <div className="mb-4 flex justify-end">
         <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ nome: '', segmento: '', resumo_estrategico: '', horizonte_temporal: '' }); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors">
           {showForm ? 'Cancelar' : '+ Nova Organização'}
@@ -66,7 +66,7 @@ export default function P2_Organizacao() {
             <FormField label="Horizonte Temporal" value={form.horizonte_temporal} onChange={(v) => setForm({ ...form, horizonte_temporal: v })} placeholder="Ex: 2024-2028" />
           </div>
           <FormField label="Resumo Estratégico (opcional)" type="textarea" value={form.resumo_estrategico} onChange={(v) => setForm({ ...form, resumo_estrategico: v })} rows={4} />
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex justify-end">
             <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
               {editId ? 'Salvar Alterações' : 'Cadastrar'}
             </button>
