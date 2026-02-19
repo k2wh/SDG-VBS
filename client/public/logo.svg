@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 56" fill="none">
+  <!-- Icon: interconnected nodes representing stakeholders -->
+  <g transform="translate(4, 4)">
+    <!-- Connections -->
+    <line x1="24" y1="10" x2="12" y2="36" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="24" y1="10" x2="36" y2="36" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="12" y1="36" x2="36" y2="36" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="24" y1="10" x2="42" y2="14" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="36" x2="42" y2="14" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="36" x2="4" y2="20" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"/>
+    <!-- Center glow -->
+    <circle cx="24" cy="25" r="5" fill="#3b82f6" opacity="0.25"/>
+    <!-- Main nodes -->
+    <circle cx="24" cy="10" r="6" fill="#3b82f6"/>
+    <circle cx="12" cy="36" r="6" fill="#3b82f6"/>
+    <circle cx="36" cy="36" r="6" fill="#3b82f6"/>
+    <!-- Inner dots -->
+    <circle cx="24" cy="10" r="2.5" fill="white" opacity="0.9"/>
+    <circle cx="12" cy="36" r="2.5" fill="white" opacity="0.9"/>
+    <circle cx="36" cy="36" r="2.5" fill="white" opacity="0.9"/>
+    <!-- Secondary nodes -->
+    <circle cx="42" cy="14" r="4" fill="#60a5fa"/>
+    <circle cx="4" cy="20" r="4" fill="#60a5fa"/>
+    <circle cx="42" cy="14" r="1.5" fill="white" opacity="0.8"/>
+    <circle cx="4" cy="20" r="1.5" fill="white" opacity="0.8"/>
+  </g>
+  <!-- Text -->
+  <text x="58" y="26" font-family="Inter, Segoe UI, system-ui, sans-serif" font-weight="800" font-size="20" fill="white">SDG</text>
+  <text x="58" y="46" font-family="Inter, Segoe UI, system-ui, sans-serif" font-weight="600" font-size="15" fill="#93c5fd">VBS</text>
+  <text x="94" y="46" font-family="Inter, Segoe UI, system-ui, sans-serif" font-weight="400" font-size="9" fill="#94a3b8" letter-spacing="0.5">Valor &amp; Beneficios</text>
+</svg>

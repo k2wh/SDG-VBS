@@ -1,0 +1,13 @@
+{
+  "name": "sdg-vbs",
+  "version": "1.0.0",
+  "description": "Sistema Dinâmico de Gestão do Valor e Benefícios",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "client": "cd client && npm run dev",
+    "server": "cd server && node index.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
