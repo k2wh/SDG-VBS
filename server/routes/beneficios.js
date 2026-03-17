@@ -47,12 +47,12 @@ router.delete('/:id', (req, res) => {
 
 // Stakeholder linking
 router.post('/:id/stakeholders', (req, res) => {
-  const { stakeholder_id, classe_stakeholder, poder, legitimidade, urgencia } = req.body;
+  const { stakeholder_id, papel, classe_stakeholder, poder, legitimidade, urgencia } = req.body;
   const saliencia = (poder || 0) * (legitimidade || 0) * (urgencia || 0);
   try {
     const result = db.prepare(
-      'INSERT INTO beneficio_stakeholders (beneficio_id, stakeholder_id, classe_stakeholder, poder, legitimidade, urgencia, saliencia, saliencia_normalizada) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-    ).run(req.params.id, stakeholder_id, classe_stakeholder || null, poder || 0, legitimidade || 0, urgencia || 0, saliencia, 0);
+      'INSERT INTO beneficio_stakeholders (beneficio_id, stakeholder_id, papel, classe_stakeholder, poder, legitimidade, urgencia, saliencia, saliencia_normalizada) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).run(req.params.id, stakeholder_id, papel || null, classe_stakeholder || null, poder || 0, legitimidade || 0, urgencia || 0, saliencia, 0);
     res.status(201).json({ id: result.lastInsertRowid });
   } catch (e) {
     res.status(409).json({ error: 'Stakeholder já vinculado a este benefício' });

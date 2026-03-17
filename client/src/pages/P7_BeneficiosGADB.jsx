@@ -70,14 +70,19 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
 
   const handleLinkSH = async () => {
     if (!linkSH || !detail) return;
-    await beneficios.addStakeholder(detail.id, { stakeholder_id: Number(linkSH), papel: linkPersp, classe: linkClasseSH, poder: Number(linkPoder), legitimidade: Number(linkLegitimidade), urgencia: Number(linkUrgencia) });
-    setLinkSH('');
-    setLinkPersp('');
-    setLinkPoder(1);
-    setLinkLegitimidade(1);
-    setLinkUrgencia(1);
-    setLinkClasseSH('');
-    openDetail(detail);
+    try {
+      await beneficios.addStakeholder(detail.id, { stakeholder_id: Number(linkSH), papel: linkPersp, classe_stakeholder: linkClasseSH, poder: Number(linkPoder), legitimidade: Number(linkLegitimidade), urgencia: Number(linkUrgencia) });
+      setLinkSH('');
+      setLinkPersp('');
+      setLinkPoder(1);
+      setLinkLegitimidade(1);
+      setLinkUrgencia(1);
+      setLinkClasseSH('');
+      openDetail(detail);
+    } catch (err) {
+      console.error('Erro ao vincular stakeholder:', err);
+      alert('Erro ao vincular stakeholder: ' + err.message);
+    }
   };
 
   const handleUnlinkSH = async (sid) => {
@@ -87,8 +92,13 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
 
   const handleRecalcSaliencia = async () => {
     if (!detail) return;
-    await beneficios.recalcSaliencia(detail.id);
-    openDetail(detail);
+    try {
+      await beneficios.recalcSaliencia(detail.id);
+      openDetail(detail);
+    } catch (err) {
+      console.error('Erro ao recalcular saliência:', err);
+      alert('Erro ao recalcular saliência: ' + err.message);
+    }
   };
 
   const columns = [
@@ -149,16 +159,19 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
   ];
 
   const classeSHOpts = [
-    { value: 'Conflito de interesses pessoais ou grupais', label: 'Conflito de interesses pessoais ou grupais' },
-    { value: 'Conflitos associados com os processos comunicacionais do grupo', label: 'Conflitos associados com os processos comunicacionais do grupo' },
-    { value: 'Conflitos de percepcao do valor e/ou beneficios', label: 'Conflitos de percepcao do valor e/ou beneficios' },
-    { value: 'Conflitos por diversidade cultural', label: 'Conflitos por diversidade cultural' },
-    { value: 'Conflitos relacionados ao conteudo das atividades e coordenacao', label: 'Conflitos relacionados ao conteudo das atividades e coordenacao' },
-    { value: 'Conflitos relacionados aos estabelecimentos de prioridades', label: 'Conflitos relacionados aos estabelecimentos de prioridades' },
-    { value: 'Conflitos relacionados com a distribuicao dos beneficios', label: 'Conflitos relacionados com a distribuicao dos beneficios' },
-    { value: 'Conflitos relacionados com diferencas entre expectativas e os resultados obtidos', label: 'Conflitos relacionados com diferencas entre expectativas e os resultados obtidos' },
-    { value: 'Conflitos relacionados com interpretacao de dados e sistema de medicao/avaliacao', label: 'Conflitos relacionados com interpretacao de dados e sistema de medicao/avaliacao' },
+    { value: 'Avaliador / Validador', label: 'Avaliador / Validador' },
+    { value: 'Cocriador', label: 'Cocriador' },
+    { value: 'Colaborador / Facilitador', label: 'Colaborador / Facilitador' },
+    { value: 'Contratante', label: 'Contratante' },
+    { value: 'Definidor', label: 'Definidor' },
+    { value: 'Fornecedor', label: 'Fornecedor' },
+    { value: 'Influenciador', label: 'Influenciador' },
+    { value: 'Investidor / Patrocinador', label: 'Investidor / Patrocinador' },
+    { value: 'Negociador / Mediador', label: 'Negociador / Mediador' },
     { value: 'Outros', label: 'Outros' },
+    { value: 'Priorizador', label: 'Priorizador' },
+    { value: 'Sustentador / Mantenedor', label: 'Sustentador / Mantenedor' },
+    { value: 'Usuario / Cliente', label: 'Usuario / Cliente' },
   ];
 
   const poderOpts = [1,2,3,4,5].map(n => ({ value: n, label: String(n) }));
@@ -238,7 +251,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
             <div>
               <FormField label="Urgencia (1-5)" type="select" value={linkUrgencia} onChange={(v) => setLinkUrgencia(Number(v))} options={poderOpts} />
             </div>
-            <button onClick={handleLinkSH} className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium h-fit">Vincular</button>
+            <button onClick={handleLinkSH} disabled={!linkSH} className={`rounded-lg px-4 py-2 text-sm font-medium h-fit ${linkSH ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>Vincular</button>
           </div>
           {(detail.stakeholders || []).length > 0 ? (
             <div className="overflow-x-auto">

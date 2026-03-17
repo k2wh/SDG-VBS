@@ -125,14 +125,19 @@ export default function P6_ValorDPD({ projetoAtivo }) {
 
   const handleLinkSH = async () => {
     if (!linkSH || !detail) return;
-    await valores.addStakeholder(detail.id, { stakeholder_id: Number(linkSH), perspectiva: linkPersp, classe_stakeholder: linkClasseSH, poder: Number(linkPoder), legitimidade: Number(linkLegitimidade), urgencia: Number(linkUrgencia) });
-    setLinkSH('');
-    setLinkPersp('');
-    setLinkClasseSH('');
-    setLinkPoder(1);
-    setLinkLegitimidade(1);
-    setLinkUrgencia(1);
-    openDetail(detail);
+    try {
+      await valores.addStakeholder(detail.id, { stakeholder_id: Number(linkSH), perspectiva: linkPersp, classe_stakeholder: linkClasseSH, poder: Number(linkPoder), legitimidade: Number(linkLegitimidade), urgencia: Number(linkUrgencia) });
+      setLinkSH('');
+      setLinkPersp('');
+      setLinkClasseSH('');
+      setLinkPoder(1);
+      setLinkLegitimidade(1);
+      setLinkUrgencia(1);
+      openDetail(detail);
+    } catch (err) {
+      console.error('Erro ao vincular stakeholder:', err);
+      alert('Erro ao vincular stakeholder: ' + err.message);
+    }
   };
 
   const handleUnlinkSH = async (sid) => {
@@ -142,8 +147,13 @@ export default function P6_ValorDPD({ projetoAtivo }) {
 
   const handleRecalcularSaliencia = async () => {
     if (!detail) return;
-    await valores.recalcularSaliencia(detail.id);
-    openDetail(detail);
+    try {
+      await valores.recalcularSaliencia(detail.id);
+      openDetail(detail);
+    } catch (err) {
+      console.error('Erro ao recalcular saliência:', err);
+      alert('Erro ao recalcular saliência: ' + err.message);
+    }
   };
 
   const columns = [
@@ -235,7 +245,7 @@ export default function P6_ValorDPD({ projetoAtivo }) {
             </div>
           </div>
           <div className="mb-4 flex gap-2">
-            <button onClick={handleLinkSH} className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">Vincular</button>
+            <button onClick={handleLinkSH} disabled={!linkSH} className={`rounded-lg px-4 py-2 text-sm font-medium ${linkSH ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>Vincular</button>
             <button onClick={handleRecalcularSaliencia} className="bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-4 py-2 text-sm font-medium">Recalcular Saliência</button>
           </div>
           {(detail.stakeholders || []).length > 0 ? (
