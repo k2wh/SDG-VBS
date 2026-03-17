@@ -55,7 +55,12 @@ router.post('/:id/stakeholders', (req, res) => {
     ).run(req.params.id, stakeholder_id, papel || null, classe_stakeholder || null, poder || 0, legitimidade || 0, urgencia || 0, saliencia, 0);
     res.status(201).json({ id: result.lastInsertRowid });
   } catch (e) {
-    res.status(409).json({ error: 'Stakeholder já vinculado a este benefício' });
+    console.error('Erro ao vincular stakeholder ao benefício:', e.message);
+    if (e.message.includes('UNIQUE')) {
+      res.status(409).json({ error: 'Stakeholder já vinculado a este benefício' });
+    } else {
+      res.status(500).json({ error: e.message });
+    }
   }
 });
 

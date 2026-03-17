@@ -22,6 +22,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
   const [linkPersp, setLinkPersp] = useState('');
   const [linkPoder, setLinkPoder] = useState(1);
   const [linkLegitimidade, setLinkLegitimidade] = useState(1);
+  const [toast, setToast] = useState(null);
   const [linkUrgencia, setLinkUrgencia] = useState(1);
   const [linkClasseSH, setLinkClasseSH] = useState('');
 
@@ -79,9 +80,11 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
       setLinkUrgencia(1);
       setLinkClasseSH('');
       openDetail(detail);
+      setToast({ type: 'success', msg: 'Stakeholder vinculado com sucesso' });
+      setTimeout(() => setToast(null), 3000);
     } catch (err) {
-      console.error('Erro ao vincular stakeholder:', err);
-      alert('Erro ao vincular stakeholder: ' + err.message);
+      setToast({ type: 'error', msg: err.message });
+      setTimeout(() => setToast(null), 4000);
     }
   };
 
@@ -95,9 +98,11 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
     try {
       await beneficios.recalcSaliencia(detail.id);
       openDetail(detail);
+      setToast({ type: 'success', msg: 'Saliência recalculada com sucesso' });
+      setTimeout(() => setToast(null), 3000);
     } catch (err) {
-      console.error('Erro ao recalcular saliência:', err);
-      alert('Erro ao recalcular saliência: ' + err.message);
+      setToast({ type: 'error', msg: err.message });
+      setTimeout(() => setToast(null), 4000);
     }
   };
 
@@ -292,6 +297,16 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
               </tbody></table>
             </div>
           ) : <p className="text-gray-400 text-sm">Nenhum stakeholder vinculado.</p>}
+        </div>
+      )}
+
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium flex items-center gap-2 transition-all ${
+          toast.type === 'error' ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-green-50 text-green-800 border border-green-200'
+        }`}>
+          <span>{toast.type === 'error' ? '✕' : '✓'}</span>
+          <span>{toast.msg}</span>
+          <button onClick={() => setToast(null)} className="ml-2 text-gray-400 hover:text-gray-600">&times;</button>
         </div>
       )}
 
