@@ -59,6 +59,9 @@ export const valores = {
   remove: (id) => request(`${API}/valores/${id}`, { method: 'DELETE' }),
   addStakeholder: (id, data) => request(`${API}/valores/${id}/stakeholders`, { method: 'POST', body: JSON.stringify(data) }),
   removeStakeholder: (id, sid) => request(`${API}/valores/${id}/stakeholders/${sid}`, { method: 'DELETE' }),
+  getStakeholders: (id) => request(`${API}/valores/${id}/stakeholders`),
+  updateStakeholder: (valorId, shId, data) => request(`${API}/valores/${valorId}/stakeholders/${shId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  recalcularSaliencia: (id) => request(`${API}/valores/${id}/recalcular-saliencia`, { method: 'POST' }),
 };
 
 // Benefícios
@@ -69,12 +72,18 @@ export const beneficios = {
   create: (data) => request(`${API}/beneficios`, { method: 'POST', body: JSON.stringify(data) }),
   update: (id, data) => request(`${API}/beneficios/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   remove: (id) => request(`${API}/beneficios/${id}`, { method: 'DELETE' }),
+  addStakeholder: (id, data) => request(`${API}/beneficios/${id}/stakeholders`, { method: 'POST', body: JSON.stringify(data) }),
+  removeStakeholder: (id, sid) => request(`${API}/beneficios/${id}/stakeholders/${sid}`, { method: 'DELETE' }),
+  getStakeholders: (id) => request(`${API}/beneficios/${id}/stakeholders`),
+  updateStakeholder: (benId, shId, data) => request(`${API}/beneficios/${benId}/stakeholders/${shId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  recalcSaliencia: (id) => request(`${API}/beneficios/${id}/recalcular-saliencia`, { method: 'POST' }),
 };
 
 // Propagações
 export const propagacoes = {
   listByProjeto: (projetoId) => request(`${API}/propagacoes/projeto/${projetoId}`),
   listByBeneficio: (beneficioId) => request(`${API}/propagacoes/beneficio/${beneficioId}`),
+  get: (id) => request(`${API}/propagacoes/${id}`),
   create: (data) => request(`${API}/propagacoes`, { method: 'POST', body: JSON.stringify(data) }),
   update: (id, data) => request(`${API}/propagacoes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   remove: (id) => request(`${API}/propagacoes/${id}`, { method: 'DELETE' }),
@@ -88,12 +97,24 @@ export const sinergias = {
   remove: (id) => request(`${API}/sinergias/${id}`, { method: 'DELETE' }),
 };
 
+// Eventos do Projeto
+export const eventos = {
+  listByProjeto: (projetoId) => request(`${API}/eventos/projeto/${projetoId}`),
+  create: (data) => request(`${API}/eventos`, { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => request(`${API}/eventos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  remove: (id) => request(`${API}/eventos/${id}`, { method: 'DELETE' }),
+};
+
 // Revisões
 export const revisoes = {
   listByProjeto: (projetoId) => request(`${API}/revisoes/projeto/${projetoId}`),
   get: (id) => request(`${API}/revisoes/${id}`),
   create: (projetoId, data) => request(`${API}/revisoes/projeto/${projetoId}`, { method: 'POST', body: JSON.stringify(data) }),
+  encerrar: (id) => request(`${API}/revisoes/${id}/encerrar`, { method: 'PATCH' }),
   remove: (id) => request(`${API}/revisoes/${id}`, { method: 'DELETE' }),
+  getCiclo: (id) => request(`${API}/revisoes/${id}/ciclo`),
+  salvarBloco: (id, data) => request(`${API}/revisoes/${id}/salvar-bloco`, { method: 'PATCH', body: JSON.stringify(data) }),
+  atualizarSnapshot: (id) => request(`${API}/revisoes/${id}/atualizar-snapshot`, { method: 'PATCH' }),
 };
 
 // Consolidação

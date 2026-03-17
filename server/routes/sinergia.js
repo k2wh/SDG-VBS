@@ -15,18 +15,18 @@ router.get('/projeto/:projetoId', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto } = req.body;
+  const { beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto, justificativa_outros } = req.body;
   const result = db.prepare(
-    'INSERT INTO sinergias (beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto) VALUES (?, ?, ?, ?, ?)'
-  ).run(beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto);
+    'INSERT INTO sinergias (beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto, justificativa_outros) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto, justificativa_outros || null);
   res.status(201).json({ id: result.lastInsertRowid, ...req.body });
 });
 
 router.put('/:id', (req, res) => {
-  const { beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto } = req.body;
+  const { beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto, justificativa_outros } = req.body;
   db.prepare(
-    'UPDATE sinergias SET beneficio_a_id=?, beneficio_b_id=?, tipo_relacao=?, descricao=?, impacto=?, atualizado_em=CURRENT_TIMESTAMP WHERE id=?'
-  ).run(beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto, req.params.id);
+    'UPDATE sinergias SET beneficio_a_id=?, beneficio_b_id=?, tipo_relacao=?, descricao=?, impacto=?, justificativa_outros=?, atualizado_em=CURRENT_TIMESTAMP WHERE id=?'
+  ).run(beneficio_a_id, beneficio_b_id, tipo_relacao, descricao, impacto, justificativa_outros || null, req.params.id);
   res.json({ id: Number(req.params.id), ...req.body });
 });
 

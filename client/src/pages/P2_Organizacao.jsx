@@ -65,7 +65,7 @@ export default function P2_Organizacao() {
             <FormField label="Segmento" value={form.segmento} onChange={(v) => setForm({ ...form, segmento: v })} />
             <FormField label="Horizonte Temporal" value={form.horizonte_temporal} onChange={(v) => setForm({ ...form, horizonte_temporal: v })} placeholder="Ex: 2024-2028" />
           </div>
-          <FormField label="Resumo Estratégico (opcional)" type="textarea" value={form.resumo_estrategico} onChange={(v) => setForm({ ...form, resumo_estrategico: v })} rows={4} />
+          <FormField label="Alinhamento / direcionador Estratégico do Projeto" type="textarea" value={form.resumo_estrategico} onChange={(v) => setForm({ ...form, resumo_estrategico: v })} rows={4} placeholder="Registre aqui como este projeto está alinhado com a estratégia" />
           <div className="mt-4 flex justify-end">
             <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
               {editId ? 'Salvar Alterações' : 'Cadastrar'}

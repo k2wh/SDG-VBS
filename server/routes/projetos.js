@@ -2,6 +2,16 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
+const FREQUENCIA_DIAS = {
+  'Semanal': 7, 'semanal': 7,
+  'Quinzenal': 15, 'quinzenal': 15,
+  'Mensal': 30, 'mensal': 30,
+  'Bimestral': 60, 'bimestral': 60,
+  'Trimestral': 90, 'trimestral': 90,
+  'Semestral': 180, 'semestral': 180,
+  'Anual': 365, 'anual': 365
+};
+
 router.get('/', (req, res) => {
   const rows = db.prepare(`
     SELECT p.*, o.nome as organizacao_nome,
@@ -40,19 +50,21 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { organizacao_id, codigo, nome, objetivo, duracao, status, gestor_id, patrocinador_id, responsavel_id, area_responsavel, abordagem_gestao, vinculo_acao } = req.body;
+  const { organizacao_id, codigo, nome, objetivo, duracao, status, gestor_id, patrocinador_id, responsavel_id, area_responsavel, abordagem_gestao, numero_revisoes_previstas, frequencia_revisoes } = req.body;
+  const frequencia_revisoes_dias = FREQUENCIA_DIAS[frequencia_revisoes] || null;
   const result = db.prepare(
-    'INSERT INTO projetos (organizacao_id, codigo, nome, objetivo, duracao, status, gestor_id, patrocinador_id, responsavel_id, area_responsavel, abordagem_gestao, vinculo_acao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-  ).run(organizacao_id || null, codigo, nome, objetivo, duracao, status || 'Planejamento', gestor_id || null, patrocinador_id || null, responsavel_id || null, area_responsavel, abordagem_gestao, vinculo_acao);
-  res.status(201).json({ id: result.lastInsertRowid, ...req.body });
+    'INSERT INTO projetos (organizacao_id, codigo, nome, objetivo, duracao, status, gestor_id, patrocinador_id, responsavel_id, area_responsavel, abordagem_gestao, numero_revisoes_previstas, frequencia_revisoes, frequencia_revisoes_dias) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run(organizacao_id || null, codigo, nome, objetivo, duracao, status || 'Planejamento', gestor_id || null, patrocinador_id || null, responsavel_id || null, area_responsavel, abordagem_gestao, numero_revisoes_previstas || null, frequencia_revisoes || null, frequencia_revisoes_dias);
+  res.status(201).json({ id: result.lastInsertRowid, ...req.body, frequencia_revisoes_dias });
 });
 
 router.put('/:id', (req, res) => {
-  const { organizacao_id, codigo, nome, objetivo, duracao, status, gestor_id, patrocinador_id, responsavel_id, area_responsavel, abordagem_gestao, vinculo_acao } = req.body;
+  const { organizacao_id, codigo, nome, objetivo, duracao, status, gestor_id, patrocinador_id, responsavel_id, area_responsavel, abordagem_gestao, numero_revisoes_previstas, frequencia_revisoes } = req.body;
+  const frequencia_revisoes_dias = FREQUENCIA_DIAS[frequencia_revisoes] || null;
   db.prepare(
-    'UPDATE projetos SET organizacao_id=?, codigo=?, nome=?, objetivo=?, duracao=?, status=?, gestor_id=?, patrocinador_id=?, responsavel_id=?, area_responsavel=?, abordagem_gestao=?, vinculo_acao=?, atualizado_em=CURRENT_TIMESTAMP WHERE id=?'
-  ).run(organizacao_id || null, codigo, nome, objetivo, duracao, status, gestor_id || null, patrocinador_id || null, responsavel_id || null, area_responsavel, abordagem_gestao, vinculo_acao, req.params.id);
-  res.json({ id: Number(req.params.id), ...req.body });
+    'UPDATE projetos SET organizacao_id=?, codigo=?, nome=?, objetivo=?, duracao=?, status=?, gestor_id=?, patrocinador_id=?, responsavel_id=?, area_responsavel=?, abordagem_gestao=?, numero_revisoes_previstas=?, frequencia_revisoes=?, frequencia_revisoes_dias=?, atualizado_em=CURRENT_TIMESTAMP WHERE id=?'
+  ).run(organizacao_id || null, codigo, nome, objetivo, duracao, status, gestor_id || null, patrocinador_id || null, responsavel_id || null, area_responsavel, abordagem_gestao, numero_revisoes_previstas || null, frequencia_revisoes || null, frequencia_revisoes_dias, req.params.id);
+  res.json({ id: Number(req.params.id), ...req.body, frequencia_revisoes_dias });
 });
 
 router.delete('/:id', (req, res) => {

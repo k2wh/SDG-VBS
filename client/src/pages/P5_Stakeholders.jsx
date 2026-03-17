@@ -6,7 +6,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import { stakeholders as api, projetos } from '../services/api';
 
-const empty = { nome: '', papel: '', tipo: '', origem: '', interesses: '', contato: '', poder: 1, legitimidade: 1, urgencia: 1 };
+const empty = { nome: '', papel: '', tipo: '', origem: '', interesses: '', contato: '', classe_principal: '' };
 
 export default function P5_Stakeholders({ projetoAtivo }) {
   const [lista, setLista] = useState([]);
@@ -40,7 +40,7 @@ export default function P5_Stakeholders({ projetoAtivo }) {
   };
 
   const handleEdit = (row) => {
-    setForm({ nome: row.nome, papel: row.papel, tipo: row.tipo, origem: row.origem, interesses: row.interesses, contato: row.contato, poder: row.poder, legitimidade: row.legitimidade, urgencia: row.urgencia });
+    setForm({ nome: row.nome, papel: row.papel, tipo: row.tipo, origem: row.origem, interesses: row.interesses, contato: row.contato, classe_principal: row.classe_principal || '' });
     setEditId(row.id);
     setShowForm(true);
   };
@@ -64,21 +64,12 @@ export default function P5_Stakeholders({ projetoAtivo }) {
     load();
   };
 
-  const renderSaliencia = (val) => {
-    const colors = ['', 'bg-gray-200', 'bg-blue-200', 'bg-yellow-200', 'bg-orange-200', 'bg-red-200'];
-    return <span className={`px-2 py-0.5 rounded text-xs font-medium ${colors[val] || ''}`}>{val}/5</span>;
-  };
-
   const columns = [
     { key: 'nome', label: 'Nome' },
     { key: 'papel', label: 'Papel' },
     { key: 'tipo', label: 'Tipo' },
-    { key: 'poder', label: 'Poder', render: renderSaliencia },
-    { key: 'legitimidade', label: 'Legitimidade', render: renderSaliencia },
-    { key: 'urgencia', label: 'Urgência', render: renderSaliencia },
+    { key: 'classe_principal', label: 'Classe Principal' },
   ];
-
-  const nivelOptions = [1,2,3,4,5].map(n => ({ value: n, label: `${n}` }));
 
   return (
     <div>
@@ -101,9 +92,22 @@ export default function P5_Stakeholders({ projetoAtivo }) {
               options={[{ value: 'Interno', label: 'Interno' }, { value: 'Externo', label: 'Externo' }]} />
             <FormField label="Origem" value={form.origem} onChange={(v) => setForm({ ...form, origem: v })} />
             <FormField label="Contato" value={form.contato} onChange={(v) => setForm({ ...form, contato: v })} mask="telefone" />
-            <FormField label="Poder (1-5)" type="select" value={form.poder} onChange={(v) => setForm({ ...form, poder: Number(v) })} options={nivelOptions} />
-            <FormField label="Legitimidade (1-5)" type="select" value={form.legitimidade} onChange={(v) => setForm({ ...form, legitimidade: Number(v) })} options={nivelOptions} />
-            <FormField label="Urgência (1-5)" type="select" value={form.urgencia} onChange={(v) => setForm({ ...form, urgencia: Number(v) })} options={nivelOptions} />
+            <FormField label="Classe principal do stakeholder" type="select" value={form.classe_principal} onChange={(v) => setForm({ ...form, classe_principal: v })}
+              options={[
+                { value: 'Avaliador / Validador', label: 'Avaliador / Validador' },
+                { value: 'Cocriador', label: 'Cocriador' },
+                { value: 'Colaborador / Facilitador', label: 'Colaborador / Facilitador' },
+                { value: 'Contratante', label: 'Contratante' },
+                { value: 'Definidor', label: 'Definidor' },
+                { value: 'Fornecedor', label: 'Fornecedor' },
+                { value: 'Influenciador', label: 'Influenciador' },
+                { value: 'Investidor / Patrocinador', label: 'Investidor / Patrocinador' },
+                { value: 'Negociador / Mediador', label: 'Negociador / Mediador' },
+                { value: 'Outros', label: 'Outros' },
+                { value: 'Priorizador', label: 'Priorizador' },
+                { value: 'Sustentador / Mantenedor', label: 'Sustentador / Mantenedor' },
+                { value: 'Usuário / Cliente', label: 'Usuário / Cliente' },
+              ]} />
           </div>
           <div className="mt-4">
             <FormField label="Interesses" type="textarea" value={form.interesses} onChange={(v) => setForm({ ...form, interesses: v })} />

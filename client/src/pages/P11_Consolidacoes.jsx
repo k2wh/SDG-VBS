@@ -192,7 +192,143 @@ const tendenciaColors = {
   'Redução': 'bg-red-500',
 };
 
-// ---- Página ----
+// ---- CSV helpers ----
+
+function escapeCsv(value) {
+  if (value === null || value === undefined) return '';
+  const str = String(value);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+  return str;
+}
+
+function arrayToCsv(headers, rows) {
+  const lines = [headers.map(escapeCsv).join(',')];
+  rows.forEach(row => {
+    lines.push(headers.map(h => escapeCsv(row[h])).join(','));
+  });
+  return lines.join('\n');
+}
+
+function downloadCsv(filename, csvContent) {
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function buildBaselineCsv(data) {
+  const sections = [];
+
+  if (data.projeto) {
+    sections.push('=== PROJETO ===');
+    sections.push(arrayToCsv(['nome', 'codigo', 'status', 'abordagem_gestao', 'duracao'], [data.projeto]));
+  }
+
+  if (data.stakeholdersSaliencia && data.stakeholdersSaliencia.length > 0) {
+    sections.push('\n=== STAKEHOLDERS ===');
+    sections.push(arrayToCsv(['nome', 'tipo', 'papel_no_projeto', 'poder', 'legitimidade', 'urgencia', 'saliencia_total'], data.stakeholdersSaliencia));
+  }
+
+  if (data.stakeholdersPorTipo && data.stakeholdersPorTipo.length > 0) {
+    sections.push('\n=== STAKEHOLDERS POR TIPO ===');
+    sections.push(arrayToCsv(['tipo', 'total'], data.stakeholdersPorTipo));
+  }
+
+  if (data.valoresPorTemporalidade && data.valoresPorTemporalidade.length > 0) {
+    sections.push('\n=== VALORES POR TEMPORALIDADE ===');
+    sections.push(arrayToCsv(['temporalidade', 'total'], data.valoresPorTemporalidade));
+  }
+
+  if (data.valoresPorNatureza && data.valoresPorNatureza.length > 0) {
+    sections.push('\n=== VALORES POR NATUREZA ===');
+    sections.push(arrayToCsv(['natureza', 'total'], data.valoresPorNatureza));
+  }
+
+  if (data.beneficiosDetalhados && data.beneficiosDetalhados.length > 0) {
+    sections.push('\n=== BENEFICIOS ===');
+    sections.push(arrayToCsv(['descricao', 'valor_descricao', 'natureza', 'classe', 'status_realizacao'], data.beneficiosDetalhados));
+  }
+
+  if (data.beneficiosPorStatus && data.beneficiosPorStatus.length > 0) {
+    sections.push('\n=== BENEFICIOS POR STATUS ===');
+    sections.push(arrayToCsv(['status_realizacao', 'total'], data.beneficiosPorStatus));
+  }
+
+  if (data.propagacoesPorTendencia && data.propagacoesPorTendencia.length > 0) {
+    sections.push('\n=== PROPAGACOES POR TENDENCIA ===');
+    sections.push(arrayToCsv(['tendencia', 'total'], data.propagacoesPorTendencia));
+  }
+
+  if (data.propagacoesPorTipo && data.propagacoesPorTipo.length > 0) {
+    sections.push('\n=== PROPAGACOES POR TIPO ===');
+    sections.push(arrayToCsv(['tipo_propagacao', 'total'], data.propagacoesPorTipo));
+  }
+
+  if (data.sinergiasPorTipo && data.sinergiasPorTipo.length > 0) {
+    sections.push('\n=== SINERGIAS POR TIPO ===');
+    sections.push(arrayToCsv(['tipo_relacao', 'total'], data.sinergiasPorTipo));
+  }
+
+  if (data.stakeholdersEngajamento && data.stakeholdersEngajamento.length > 0) {
+    sections.push('\n=== ENGAJAMENTO DOS STAKEHOLDERS ===');
+    sections.push(arrayToCsv(['nome', 'vinculos_valores', 'vinculos_propagacoes'], data.stakeholdersEngajamento));
+  }
+
+  if (data.salienciaMedia) {
+    sections.push('\n=== SALIENCIA MEDIA ===');
+    sections.push(arrayToCsv(['media_poder', 'media_legitimidade', 'media_urgencia'], [data.salienciaMedia]));
+  }
+
+  sections.push('\n=== TOTAIS ===');
+  sections.push(arrayToCsv(
+    ['stakeholders', 'valores', 'beneficios', 'propagacoes', 'sinergias', 'revisoes'],
+    [{ stakeholders: data.totalStakeholders, valores: data.totalValores, beneficios: data.totalBeneficios, propagacoes: data.totalPropagacoes, sinergias: data.totalSinergias, revisoes: data.totalRevisoes }]
+  ));
+
+  return sections.join('\n');
+}
+
+function buildRevisoesCsv(data) {
+  if (!data.revisoes || data.revisoes.length === 0) return '';
+  const sections = ['=== HISTORICO DE REVISOES ==='];
+
+  const revRows = data.revisoes.map(rev => {
+    let snapshot = null;
+    try { snapshot = typeof rev.snapshot_dados === 'string' ? JSON.parse(rev.snapshot_dados) : rev.snapshot_dados; } catch {}
+    const countOf = (key) => {
+      if (!snapshot || snapshot[key] === undefined) return 0;
+      return typeof snapshot[key] === 'number' ? snapshot[key] : (snapshot[key]?.length || 0);
+    };
+    return {
+      id: rev.id,
+      data_revisao: rev.data_revisao,
+      nome_arquivo: rev.nome_arquivo,
+      descricao: rev.descricao || '',
+      valores: countOf('valores'),
+      beneficios: countOf('beneficios'),
+      stakeholders: countOf('stakeholders'),
+      propagacoes: countOf('propagacoes'),
+      sinergias: countOf('sinergias'),
+    };
+  });
+
+  sections.push(arrayToCsv(
+    ['id', 'data_revisao', 'nome_arquivo', 'descricao', 'valores', 'beneficios', 'stakeholders', 'propagacoes', 'sinergias'],
+    revRows
+  ));
+
+  return sections.join('\n');
+}
+
+// ---- Pagina ----
 
 export default function P11_Consolidacoes({ projetoAtivo }) {
   const [data, setData] = useState(null);
@@ -227,6 +363,38 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
   return (
     <div>
       <StepHeader numero={11} titulo="Consolidacoes" descricao="Visao consolidada e analises do projeto" />
+
+      {/* Botoes de Exportacao CSV */}
+      <div className="mb-6 flex gap-3 justify-end">
+        <button
+          onClick={() => {
+            const csv = buildBaselineCsv(data);
+            const nome = data.projeto?.codigo || 'projeto';
+            downloadCsv(`sdgvbs_baseline_${nome.replace(/\s+/g, '_')}.csv`, csv);
+          }}
+          className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 shadow-sm"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+          </svg>
+          Exportar CSV (Baseline)
+        </button>
+        {data.revisoes && data.revisoes.length > 0 && (
+          <button
+            onClick={() => {
+              const csv = buildRevisoesCsv(data);
+              const nome = data.projeto?.codigo || 'projeto';
+              downloadCsv(`sdgvbs_revisoes_${nome.replace(/\s+/g, '_')}.csv`, csv);
+            }}
+            className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+            </svg>
+            Exportar CSV (Revisoes)
+          </button>
+        )}
+      </div>
 
       {/* Header do Projeto */}
       {data.projeto && (

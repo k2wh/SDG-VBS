@@ -3,9 +3,9 @@ import StepHeader from '../components/StepHeader';
 import FormField from '../components/FormField';
 import DataTable from '../components/DataTable';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { projetos, organizacoes, gestores as gestoresApi } from '../services/api';
+import { projetos, organizacoes, gestores as gestoresApi, eventos } from '../services/api';
 
-const empty = { organizacao_id: '', codigo: '', nome: '', objetivo: '', duracao: '', status: 'Planejamento', gestor_id: '', patrocinador_id: '', responsavel_id: '', area_responsavel: '', abordagem_gestao: '', vinculo_acao: '' };
+const empty = { organizacao_id: '', codigo: '', nome: '', objetivo: '', duracao: '', status: 'Planejamento', gestor_id: '', patrocinador_id: '', responsavel_id: '', area_responsavel: '', abordagem_gestao: '', numero_revisoes_previstas: 0, frequencia_revisoes: '', frequencia_revisoes_dias: 30 };
 
 export default function P4_Projetos({ setProjetoAtivo }) {
   const [lista, setLista] = useState([]);
@@ -15,6 +15,20 @@ export default function P4_Projetos({ setProjetoAtivo }) {
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [eventosList, setEventosList] = useState([]);
+  const [eventoForm, setEventoForm] = useState({ projeto_id: '', data_evento: '', tipo_evento: '', titulo: '', descricao: '', responsavel_id: '' });
+  const [showEventos, setShowEventos] = useState(null);
+  const [editEventoId, setEditEventoId] = useState(null);
+
+  const tipoEventoOpts = [
+    { value: 'kick-off', label: 'Kick-off' }, { value: 'Execução', label: 'Execução' }, { value: 'Entrega', label: 'Entrega' },
+    { value: 'check-point', label: 'Check-point' }, { value: 'revisão', label: 'Revisão' }, { value: 'encerramento de fase', label: 'Encerramento de fase' },
+    { value: 'encerramento do projeto', label: 'Encerramento do projeto' }, { value: 'realização de benefícios', label: 'Realização de benefícios' }, { value: 'outros', label: 'Outros' },
+  ];
+
+  const loadEventos = (projetoId) => {
+    eventos.listByProjeto(projetoId).then(setEventosList);
+  };
 
   const load = () => {
     projetos.list().then(setLista);
@@ -41,7 +55,8 @@ export default function P4_Projetos({ setProjetoAtivo }) {
     setForm({
       organizacao_id: row.organizacao_id || '', codigo: row.codigo, nome: row.nome, objetivo: row.objetivo,
       duracao: row.duracao, status: row.status, gestor_id: row.gestor_id || '', patrocinador_id: row.patrocinador_id || '',
-      responsavel_id: row.responsavel_id || '', area_responsavel: row.area_responsavel, abordagem_gestao: row.abordagem_gestao, vinculo_acao: row.vinculo_acao
+      responsavel_id: row.responsavel_id || '', area_responsavel: row.area_responsavel, abordagem_gestao: row.abordagem_gestao,
+      numero_revisoes_previstas: row.numero_revisoes_previstas || 0, frequencia_revisoes: row.frequencia_revisoes || '', frequencia_revisoes_dias: row.frequencia_revisoes_dias || 30
     });
     setEditId(row.id);
     setShowForm(true);
@@ -98,7 +113,15 @@ export default function P4_Projetos({ setProjetoAtivo }) {
             <FormField label="Patrocinador" type="select" value={form.patrocinador_id} onChange={(v) => setForm({ ...form, patrocinador_id: v })} options={gestoresOpts} searchable />
             <FormField label="Responsável da Área" type="select" value={form.responsavel_id} onChange={(v) => setForm({ ...form, responsavel_id: v })} options={gestoresOpts} searchable />
             <FormField label="Área Responsável" value={form.area_responsavel} onChange={(v) => setForm({ ...form, area_responsavel: v })} />
-            <FormField label="Vínculo com Ação" value={form.vinculo_acao} onChange={(v) => setForm({ ...form, vinculo_acao: v })} placeholder="Opcional" />
+            <FormField label="Número de revisões previstas" type="number" value={form.numero_revisoes_previstas} onChange={(v) => setForm({ ...form, numero_revisoes_previstas: v })} />
+            <FormField label="Frequência de revisões" type="select" value={form.frequencia_revisoes} onChange={(v) => {
+              const diasMap = { 'Semanal': 7, 'Quinzenal': 15, 'Mensal': 30, 'Bimestral': 60, 'Trimestral': 90, 'Semestral': 180, 'Anual': 365 };
+              setForm({ ...form, frequencia_revisoes: v, frequencia_revisoes_dias: diasMap[v] || 30 });
+            }} options={[
+              { value: 'Semanal', label: 'Semanal' }, { value: 'Quinzenal', label: 'Quinzenal' }, { value: 'Mensal', label: 'Mensal' },
+              { value: 'Bimestral', label: 'Bimestral' }, { value: 'Trimestral', label: 'Trimestral' }, { value: 'Semestral', label: 'Semestral' },
+              { value: 'Anual', label: 'Anual' }
+            ]} />
           </div>
           <div className="mt-4">
             <FormField label="Objetivo" type="textarea" value={form.objetivo} onChange={(v) => setForm({ ...form, objetivo: v })} />
@@ -113,11 +136,79 @@ export default function P4_Projetos({ setProjetoAtivo }) {
 
       <DataTable columns={columns} data={lista} onEdit={handleEdit} onDelete={(row) => setDeleteTarget(row)}
         actions={(row) => (
-          <button onClick={() => setProjetoAtivo(row.id)} className="text-green-600 hover:text-green-800 text-sm font-medium mr-2">
-            Selecionar
-          </button>
+          <>
+            <button onClick={() => setProjetoAtivo(row.id)} className="text-green-600 hover:text-green-800 text-sm font-medium mr-2">
+              Selecionar
+            </button>
+            <button onClick={() => { setShowEventos(row.id); loadEventos(row.id); }} className="text-primary-600 hover:text-primary-800 text-sm font-medium">
+              Eventos
+            </button>
+          </>
         )}
       />
+
+      {showEventos && (
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">Eventos do Projeto — {lista.find(p => p.id === showEventos)?.nome}</h3>
+            <button onClick={() => { setShowEventos(null); setEventosList([]); }} className="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+              <FormField label="Data" type="date" value={eventoForm.data_evento} onChange={(v) => setEventoForm({ ...eventoForm, data_evento: v })} required />
+              <FormField label="Tipo" type="select" value={eventoForm.tipo_evento} onChange={(v) => setEventoForm({ ...eventoForm, tipo_evento: v })} options={tipoEventoOpts} />
+              <FormField label="Título" value={eventoForm.titulo} onChange={(v) => setEventoForm({ ...eventoForm, titulo: v })} required />
+              <FormField label="Responsável" type="select" value={eventoForm.responsavel_id} onChange={(v) => setEventoForm({ ...eventoForm, responsavel_id: v })} options={gestoresOpts} searchable />
+            </div>
+            <div className="mt-3">
+              <FormField label="Descrição" type="textarea" value={eventoForm.descricao} onChange={(v) => setEventoForm({ ...eventoForm, descricao: v })} rows={2} />
+            </div>
+            <div className="mt-3 flex justify-end gap-2">
+              {editEventoId && <button onClick={() => { setEditEventoId(null); setEventoForm({ projeto_id: '', data_evento: '', tipo_evento: '', titulo: '', descricao: '', responsavel_id: '' }); }} className="text-gray-500 hover:text-gray-700 text-sm">Cancelar</button>}
+              <button onClick={async () => {
+                if (!eventoForm.data_evento || !eventoForm.titulo) return;
+                if (editEventoId) {
+                  await eventos.update(editEventoId, eventoForm);
+                } else {
+                  await eventos.create({ ...eventoForm, projeto_id: showEventos });
+                }
+                setEventoForm({ projeto_id: '', data_evento: '', tipo_evento: '', titulo: '', descricao: '', responsavel_id: '' });
+                setEditEventoId(null);
+                loadEventos(showEventos);
+              }} className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
+                {editEventoId ? 'Salvar' : 'Adicionar Evento'}
+              </button>
+            </div>
+          </div>
+          {eventosList.length > 0 ? (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead><tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Data</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Tipo</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Título</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Ações</th>
+                </tr></thead>
+                <tbody className="divide-y divide-gray-100">
+                  {eventosList.map(ev => (
+                    <tr key={ev.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm">{ev.data_evento}</td>
+                      <td className="px-4 py-3 text-sm"><span className="bg-primary-100 text-primary-800 text-xs px-2 py-0.5 rounded-full">{ev.tipo_evento}</span></td>
+                      <td className="px-4 py-3 text-sm font-medium">{ev.titulo}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500">{ev.descricao || '-'}</td>
+                      <td className="px-4 py-3 text-right flex gap-2 justify-end">
+                        <button onClick={() => { setEditEventoId(ev.id); setEventoForm({ data_evento: ev.data_evento, tipo_evento: ev.tipo_evento, titulo: ev.titulo, descricao: ev.descricao || '', responsavel_id: ev.responsavel_id || '' }); }} className="text-primary-600 hover:text-primary-800 text-sm font-medium">Editar</button>
+                        <button onClick={async () => { await eventos.remove(ev.id); loadEventos(showEventos); }} className="text-red-600 hover:text-red-800 text-sm font-medium">Excluir</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : <p className="text-gray-400 text-sm">Nenhum evento cadastrado.</p>}
+        </div>
+      )}
 
       <ConfirmDialog open={!!deleteTarget} title="Excluir Projeto"
         message={`Deseja excluir "${deleteTarget?.nome}"? Todos os dados vinculados serão perdidos.`}

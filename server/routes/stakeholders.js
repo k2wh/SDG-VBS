@@ -14,18 +14,18 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { nome, papel, tipo, origem, interesses, contato, poder, legitimidade, urgencia } = req.body;
+  const { nome, papel, tipo, origem, interesses, contato, classe_principal } = req.body;
   const result = db.prepare(
-    'INSERT INTO stakeholders (nome, papel, tipo, origem, interesses, contato, poder, legitimidade, urgencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-  ).run(nome, papel, tipo, origem, interesses, contato, poder || 1, legitimidade || 1, urgencia || 1);
+    'INSERT INTO stakeholders (nome, papel, tipo, origem, interesses, contato, classe_principal) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).run(nome, papel, tipo, origem, interesses, contato, classe_principal || null);
   res.status(201).json({ id: result.lastInsertRowid, ...req.body });
 });
 
 router.put('/:id', (req, res) => {
-  const { nome, papel, tipo, origem, interesses, contato, poder, legitimidade, urgencia } = req.body;
+  const { nome, papel, tipo, origem, interesses, contato, classe_principal } = req.body;
   db.prepare(
-    'UPDATE stakeholders SET nome=?, papel=?, tipo=?, origem=?, interesses=?, contato=?, poder=?, legitimidade=?, urgencia=?, atualizado_em=CURRENT_TIMESTAMP WHERE id=?'
-  ).run(nome, papel, tipo, origem, interesses, contato, poder, legitimidade, urgencia, req.params.id);
+    'UPDATE stakeholders SET nome=?, papel=?, tipo=?, origem=?, interesses=?, contato=?, classe_principal=?, atualizado_em=CURRENT_TIMESTAMP WHERE id=?'
+  ).run(nome, papel, tipo, origem, interesses, contato, classe_principal || null, req.params.id);
   res.json({ id: Number(req.params.id), ...req.body });
 });
 

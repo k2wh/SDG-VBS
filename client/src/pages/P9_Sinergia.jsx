@@ -6,7 +6,22 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import { sinergias, beneficios } from '../services/api';
 
-const empty = { beneficio_a_id: '', beneficio_b_id: '', tipo_relacao: '', descricao: '', impacto: '' };
+const empty = { beneficio_a_id: '', beneficio_b_id: '', tipo_relacao: '', justificativa_outros: '', descricao: '', impacto: '' };
+
+const tipoRelacaoOptions = [
+  { value: 'Reforço', label: 'Reforço - os benefícios se reforçam mutuamente' },
+  { value: 'Complementaridade', label: 'Complementaridade - benefícios que se completam' },
+  { value: 'Dependência funcional', label: 'Dependência funcional - útil se outros benefícios forem realizados' },
+  { value: 'Estrutural', label: 'Estrutural - dependência com estruturas da organização' },
+  { value: 'Sequencial', label: 'Sequencial - predecessor ou sucessor de outros benefícios' },
+  { value: 'Escala', label: 'Escala - cresce quando outros benefícios são alcançados' },
+  { value: 'Dinâmica', label: 'Dinâmica - ciclo de retroalimentação com outros benefícios' },
+  { value: 'Emergente', label: 'Emergente - surge da interação entre outros benefícios' },
+  { value: 'Evolutiva', label: 'Evolutiva - modificações acarretam mudanças em outros' },
+  { value: 'Ambiental', label: 'Ambiental - influenciado pelo contexto externo' },
+  { value: 'Antagônica', label: 'Antagônica - conflita com um ou mais benefícios' },
+  { value: 'Outros', label: 'Outros' },
+];
 
 export default function P9_Sinergia({ projetoAtivo }) {
   const [lista, setLista] = useState([]);
@@ -39,7 +54,7 @@ export default function P9_Sinergia({ projetoAtivo }) {
   };
 
   const handleEdit = (row) => {
-    setForm({ beneficio_a_id: row.beneficio_a_id, beneficio_b_id: row.beneficio_b_id, tipo_relacao: row.tipo_relacao, descricao: row.descricao, impacto: row.impacto });
+    setForm({ beneficio_a_id: row.beneficio_a_id, beneficio_b_id: row.beneficio_b_id, tipo_relacao: row.tipo_relacao, justificativa_outros: row.justificativa_outros || '', descricao: row.descricao, impacto: row.impacto });
     setEditId(row.id);
     setShowForm(true);
   };
@@ -51,11 +66,18 @@ export default function P9_Sinergia({ projetoAtivo }) {
   };
 
   const tipoColors = {
-    'Sinergia': 'bg-green-100 text-green-800',
+    'Reforço': 'bg-green-100 text-green-800',
     'Complementaridade': 'bg-blue-100 text-blue-800',
-    'Dependência': 'bg-yellow-100 text-yellow-800',
-    'Competição': 'bg-red-100 text-red-800',
-    'Neutralização': 'bg-gray-100 text-gray-800',
+    'Dependência funcional': 'bg-yellow-100 text-yellow-800',
+    'Estrutural': 'bg-purple-100 text-purple-800',
+    'Sequencial': 'bg-indigo-100 text-indigo-800',
+    'Escala': 'bg-teal-100 text-teal-800',
+    'Dinâmica': 'bg-cyan-100 text-cyan-800',
+    'Emergente': 'bg-lime-100 text-lime-800',
+    'Evolutiva': 'bg-amber-100 text-amber-800',
+    'Ambiental': 'bg-emerald-100 text-emerald-800',
+    'Antagônica': 'bg-red-100 text-red-800',
+    'Outros': 'bg-gray-100 text-gray-800',
   };
 
   const columns = [
@@ -85,8 +107,13 @@ export default function P9_Sinergia({ projetoAtivo }) {
             <FormField label="Benefício A" type="select" value={form.beneficio_a_id} onChange={(v) => setForm({ ...form, beneficio_a_id: v })} options={beneficiosOpts} required searchable />
             <FormField label="Benefício B" type="select" value={form.beneficio_b_id} onChange={(v) => setForm({ ...form, beneficio_b_id: v })} options={beneficiosOpts} required searchable />
             <FormField label="Tipo de Relação" type="select" value={form.tipo_relacao} onChange={(v) => setForm({ ...form, tipo_relacao: v })}
-              options={[{ value: 'Sinergia', label: 'Sinergia' }, { value: 'Complementaridade', label: 'Complementaridade' }, { value: 'Dependência', label: 'Dependência' }, { value: 'Competição', label: 'Competição' }, { value: 'Neutralização', label: 'Neutralização' }]} required />
+              options={tipoRelacaoOptions} required />
           </div>
+          {form.tipo_relacao === 'Outros' && (
+            <div className="mt-4">
+              <FormField label="Justificativa (Outros)" value={form.justificativa_outros} onChange={(v) => setForm({ ...form, justificativa_outros: v })} required placeholder="Descreva o tipo de relação" />
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <FormField label="Descrição" type="textarea" value={form.descricao} onChange={(v) => setForm({ ...form, descricao: v })} rows={2} />
             <FormField label="Impacto na Maximização do Valor" type="textarea" value={form.impacto} onChange={(v) => setForm({ ...form, impacto: v })} rows={2} />

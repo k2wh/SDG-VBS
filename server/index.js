@@ -18,6 +18,7 @@ app.use('/api/beneficios', require('./routes/beneficios'));
 app.use('/api/propagacoes', require('./routes/propagacao'));
 app.use('/api/sinergias', require('./routes/sinergia'));
 app.use('/api/revisoes', require('./routes/revisoes'));
+app.use('/api/eventos', require('./routes/eventos'));
 
 app.listen(PORT, () => {
   console.log(`SDG-VBS Server running on http://localhost:${PORT}`);
