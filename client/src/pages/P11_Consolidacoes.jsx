@@ -541,7 +541,7 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-emerald-500">
               <path d="M18 20V10M12 20V4M6 20v-6" />
             </svg>
-            Engajamento dos Stakeholders
+            Mapa de vínculos dos stakeholders
           </h3>
           <EngajamentoChart stakeholders={data.stakeholdersEngajamento} />
           {data.stakeholdersPorTipo && data.stakeholdersPorTipo.length > 0 && (
