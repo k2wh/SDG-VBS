@@ -89,7 +89,7 @@ function SalienciaChart({ stakeholders }) {
             {[
               { label: 'Poder', value: sh.poder, color: 'bg-red-400' },
               { label: 'Legitimidade', value: sh.legitimidade, color: 'bg-blue-400' },
-              { label: 'Urgencia', value: sh.urgencia, color: 'bg-amber-400' },
+              { label: 'Urgência', value: sh.urgencia, color: 'bg-amber-400' },
             ].map(attr => (
               <div key={attr.label}>
                 <div className="flex items-center justify-between mb-0.5">
@@ -136,7 +136,7 @@ function EngajamentoChart({ stakeholders }) {
           <div key={i}>
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm text-gray-700">{sh.nome}</span>
-              <span className="text-xs text-gray-400">{totalVinculos} vinculos</span>
+              <span className="text-xs text-gray-400">{totalVinculos} vínculos</span>
             </div>
             <div className="flex h-4 rounded-full overflow-hidden bg-gray-100">
               {sh.vinculos_valores > 0 && (
@@ -150,7 +150,7 @@ function EngajamentoChart({ stakeholders }) {
                 <div
                   className="bg-emerald-500 transition-all duration-700"
                   style={{ width: `${(sh.vinculos_propagacoes / max) * 100}%` }}
-                  title={`${sh.vinculos_propagacoes} propagacao(oes)`}
+                  title={`${sh.vinculos_propagacoes} propagação(ões)`}
                 />
               )}
             </div>
@@ -159,7 +159,7 @@ function EngajamentoChart({ stakeholders }) {
       })}
       <div className="flex gap-4 mt-2">
         <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-indigo-500" /><span className="text-xs text-gray-500">Valores</span></div>
-        <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500" /><span className="text-xs text-gray-500">Propagacoes</span></div>
+        <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500" /><span className="text-xs text-gray-500">Propagações</span></div>
       </div>
     </div>
   );
@@ -253,22 +253,22 @@ function buildBaselineCsv(data) {
   }
 
   if (data.beneficiosDetalhados && data.beneficiosDetalhados.length > 0) {
-    sections.push('\n=== BENEFICIOS ===');
+    sections.push('\n=== BENEFÍCIOS ===');
     sections.push(arrayToCsv(['descricao', 'valor_descricao', 'natureza', 'classe', 'status_realizacao'], data.beneficiosDetalhados));
   }
 
   if (data.beneficiosPorStatus && data.beneficiosPorStatus.length > 0) {
-    sections.push('\n=== BENEFICIOS POR STATUS ===');
+    sections.push('\n=== BENEFÍCIOS POR STATUS ===');
     sections.push(arrayToCsv(['status_realizacao', 'total'], data.beneficiosPorStatus));
   }
 
   if (data.propagacoesPorTendencia && data.propagacoesPorTendencia.length > 0) {
-    sections.push('\n=== PROPAGACOES POR TENDENCIA ===');
+    sections.push('\n=== PROPAGAÇÕES POR TENDÊNCIA ===');
     sections.push(arrayToCsv(['tendencia', 'total'], data.propagacoesPorTendencia));
   }
 
   if (data.propagacoesPorTipo && data.propagacoesPorTipo.length > 0) {
-    sections.push('\n=== PROPAGACOES POR TIPO ===');
+    sections.push('\n=== PROPAGAÇÕES POR TIPO ===');
     sections.push(arrayToCsv(['tipo_propagacao', 'total'], data.propagacoesPorTipo));
   }
 
@@ -283,7 +283,7 @@ function buildBaselineCsv(data) {
   }
 
   if (data.salienciaMedia) {
-    sections.push('\n=== SALIENCIA MEDIA ===');
+    sections.push('\n=== SALIÊNCIA MÉDIA ===');
     sections.push(arrayToCsv(['media_poder', 'media_legitimidade', 'media_urgencia'], [data.salienciaMedia]));
   }
 
@@ -298,7 +298,7 @@ function buildBaselineCsv(data) {
 
 function buildRevisoesCsv(data) {
   if (!data.revisoes || data.revisoes.length === 0) return '';
-  const sections = ['=== HISTORICO DE REVISOES ==='];
+  const sections = ['=== HISTÓRICO DE REVISÕES ==='];
 
   const revRows = data.revisoes.map(rev => {
     let snapshot = null;
@@ -340,11 +340,11 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
     consolidacao.get(projetoAtivo).then(setData).catch(() => setData(null)).finally(() => setLoading(false));
   }, [projetoAtivo]);
 
-  if (!projetoAtivo) return <div><StepHeader numero={11} titulo="Consolidacoes" descricao="Analises e consolidacoes" /><EmptyState /></div>;
+  if (!projetoAtivo) return <div><StepHeader numero={11} titulo="Consolidações" descricao="Análises e consolidações" /><EmptyState /></div>;
 
   if (loading || !data) return (
     <div>
-      <StepHeader numero={11} titulo="Consolidacoes" descricao="Analises e consolidacoes" />
+      <StepHeader numero={11} titulo="Consolidações" descricao="Análises e consolidações" />
       <div className="flex items-center justify-center py-20">
         <div className="animate-spin w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full" />
       </div>
@@ -354,15 +354,15 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
   const kpis = [
     { icon: iconPaths.users, label: 'Stakeholders', value: data.totalStakeholders, color: 'bg-blue-600', subtitle: 'Vinculados ao projeto' },
     { icon: iconPaths.diamond, label: 'Valores', value: data.totalValores, color: 'bg-indigo-600', subtitle: 'Valores identificados' },
-    { icon: iconPaths.target, label: 'Beneficios', value: data.totalBeneficios, color: 'bg-emerald-600', subtitle: 'Beneficios mapeados' },
-    { icon: iconPaths.share, label: 'Propagacoes', value: data.totalPropagacoes, color: 'bg-amber-600', subtitle: 'Fluxos de propagacao' },
-    { icon: iconPaths.link, label: 'Sinergias', value: data.totalSinergias, color: 'bg-purple-600', subtitle: 'Relacoes entre beneficios' },
-    { icon: iconPaths.calendar, label: 'Revisoes', value: data.totalRevisoes, color: 'bg-pink-600', subtitle: 'Ciclos de revisao' },
+    { icon: iconPaths.target, label: 'Benefícios', value: data.totalBeneficios, color: 'bg-emerald-600', subtitle: 'Benefícios mapeados' },
+    { icon: iconPaths.share, label: 'Propagações', value: data.totalPropagacoes, color: 'bg-amber-600', subtitle: 'Fluxos de propagação' },
+    { icon: iconPaths.link, label: 'Sinergias', value: data.totalSinergias, color: 'bg-purple-600', subtitle: 'Relações entre benefícios' },
+    { icon: iconPaths.calendar, label: 'Revisões', value: data.totalRevisoes, color: 'bg-pink-600', subtitle: 'Ciclos de revisão' },
   ];
 
   return (
     <div>
-      <StepHeader numero={11} titulo="Consolidacoes" descricao="Visao consolidada e analises do projeto" />
+      <StepHeader numero={11} titulo="Consolidações" descricao="Visão consolidada e análises do projeto" />
 
       {/* Botoes de Exportacao CSV */}
       <div className="mb-6 flex gap-3 justify-end">
@@ -391,7 +391,7 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
             </svg>
-            Exportar CSV (Revisoes)
+            Exportar CSV (Revisões)
           </button>
         )}
       </div>
@@ -435,7 +435,7 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-emerald-500"><path d={iconPaths.target} /></svg>
-            Status dos Beneficios
+            Status dos Benefícios
           </h3>
           <BarChart
             items={(data.beneficiosPorStatus || []).map(b => ({ label: b.status_realizacao, total: b.total }))}
@@ -460,7 +460,7 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-amber-500"><path d={iconPaths.share} /></svg>
-            Propagacoes por Tendencia
+            Propagações por Tendência
           </h3>
           <BarChart
             items={(data.propagacoesPorTendencia || []).map(p => ({ label: p.tendencia, total: p.total }))}
@@ -468,7 +468,7 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
           />
           {data.propagacoesPorTipo && data.propagacoesPorTipo.length > 0 && (
             <div className="mt-6 pt-4 border-t border-gray-100">
-              <h4 className="text-sm font-medium text-gray-600 mb-3">Por Tipo de Propagacao</h4>
+              <h4 className="text-sm font-medium text-gray-600 mb-3">Por Tipo de Propagação</h4>
               <DonutChart
                 items={data.propagacoesPorTipo.map(p => ({ label: p.tipo_propagacao, total: p.total }))}
                 colors={propagacaoColors}
@@ -481,7 +481,7 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-indigo-500"><path d={iconPaths.diamond} /></svg>
-            Distribuicao de Valores
+            Distribuição de Valores
           </h3>
           {data.valoresPorTemporalidade && data.valoresPorTemporalidade.length > 0 && (
             <div className="mb-5">
@@ -517,18 +517,18 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-base font-semibold text-gray-800 mb-2 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-blue-500"><path d={iconPaths.users} /></svg>
-            Saliencia dos Stakeholders
+            Saliência dos Stakeholders
           </h3>
           {data.salienciaMedia && (
             <div className="flex gap-4 mb-4">
               {[
                 { label: 'Poder', value: data.salienciaMedia.media_poder, color: 'text-red-600' },
                 { label: 'Legitimidade', value: data.salienciaMedia.media_legitimidade, color: 'text-blue-600' },
-                { label: 'Urgencia', value: data.salienciaMedia.media_urgencia, color: 'text-amber-600' },
+                { label: 'Urgência', value: data.salienciaMedia.media_urgencia, color: 'text-amber-600' },
               ].map(m => (
                 <div key={m.label} className="text-center">
                   <p className={`text-lg font-bold ${m.color}`}>{m.value}</p>
-                  <p className="text-xs text-gray-400">Media {m.label}</p>
+                  <p className="text-xs text-gray-400">Média {m.label}</p>
                 </div>
               ))}
             </div>
@@ -541,12 +541,12 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-emerald-500">
               <path d="M18 20V10M12 20V4M6 20v-6" />
             </svg>
-            Mapa de vínculos dos stakeholders
+            Mapa de Vínculos dos Stakeholders
           </h3>
           <EngajamentoChart stakeholders={data.stakeholdersEngajamento} />
           {data.stakeholdersPorTipo && data.stakeholdersPorTipo.length > 0 && (
             <div className="mt-6 pt-4 border-t border-gray-100">
-              <h4 className="text-sm font-medium text-gray-600 mb-3">Distribuicao por Tipo</h4>
+              <h4 className="text-sm font-medium text-gray-600 mb-3">Distribuição por Tipo</h4>
               <div className="flex gap-3">
                 {data.stakeholdersPorTipo.map((t, i) => (
                   <div key={i} className={`flex-1 rounded-lg p-3 text-center ${t.tipo === 'Interno' ? 'bg-blue-50 border border-blue-100' : 'bg-amber-50 border border-amber-100'}`}>
@@ -563,12 +563,12 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
       {/* Linha 4: Tabela de Benefícios Detalhados */}
       {data.beneficiosDetalhados && data.beneficiosDetalhados.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <h3 className="text-base font-semibold text-gray-800 mb-4">Mapa de Beneficios</h3>
+          <h3 className="text-base font-semibold text-gray-800 mb-4">Mapa de Benefícios</h3>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Beneficio</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Benefício</th>
                   <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Valor Associado</th>
                   <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Natureza</th>
                   <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Classe</th>
@@ -605,7 +605,7 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-pink-500"><path d={iconPaths.calendar} /></svg>
-            Timeline de Revisoes
+            Timeline de Revisões
           </h3>
           <div className="relative">
             <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
@@ -627,9 +627,9 @@ export default function P11_Consolidacoes({ projetoAtivo }) {
                       {snapshot && (
                         <div className="flex gap-2 flex-wrap">
                           {snapshot.valores !== undefined && <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">{typeof snapshot.valores === 'number' ? snapshot.valores : snapshot.valores?.length || 0} valores</span>}
-                          {snapshot.beneficios !== undefined && <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{typeof snapshot.beneficios === 'number' ? snapshot.beneficios : snapshot.beneficios?.length || 0} beneficios</span>}
+                          {snapshot.beneficios !== undefined && <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{typeof snapshot.beneficios === 'number' ? snapshot.beneficios : snapshot.beneficios?.length || 0} benefícios</span>}
                           {snapshot.stakeholders !== undefined && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{typeof snapshot.stakeholders === 'number' ? snapshot.stakeholders : snapshot.stakeholders?.length || 0} stakeholders</span>}
-                          {snapshot.propagacoes !== undefined && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{typeof snapshot.propagacoes === 'number' ? snapshot.propagacoes : snapshot.propagacoes?.length || 0} propagacoes</span>}
+                          {snapshot.propagacoes !== undefined && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{typeof snapshot.propagacoes === 'number' ? snapshot.propagacoes : snapshot.propagacoes?.length || 0} propagações</span>}
                           {snapshot.sinergias !== undefined && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">{typeof snapshot.sinergias === 'number' ? snapshot.sinergias : snapshot.sinergias?.length || 0} sinergias</span>}
                         </div>
                       )}

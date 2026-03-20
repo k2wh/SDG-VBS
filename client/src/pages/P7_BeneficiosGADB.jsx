@@ -72,7 +72,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
   };
   useEffect(() => { load(); }, [projetoAtivo]);
 
-  if (!projetoAtivo) return <div><StepHeader numero={7} titulo="GADB Beneficios" descricao="Identificacao e definicao dos beneficios" /><EmptyState /></div>;
+  if (!projetoAtivo) return <div><StepHeader numero={7} titulo="GADB Benefícios" descricao="Identificação e definição dos benefícios" /><EmptyState /></div>;
 
   const closeModal = () => { setShowForm(false); setEditId(null); setForm({ ...empty }); };
   const closeDetail = () => { setDetail(null); setLinkSH(''); setLinkPersp(''); setLinkPoder(1); setLinkLegitimidade(1); setLinkUrgencia(1); setLinkClasseSH(''); };
@@ -145,7 +145,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
   };
 
   const columns = [
-    { key: 'descricao', label: 'Beneficio' },
+    { key: 'descricao', label: 'Benefício' },
     { key: 'valor_descricao', label: 'Valor Associado' },
     { key: 'natureza', label: 'Natureza' },
     { key: 'classe', label: 'Classe' },
@@ -163,19 +163,19 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
   const gestoresOpts = gestoresList.map(g => ({ value: g.id, label: `${g.nome}${g.cargo ? ` (${g.cargo})` : ''}` }));
 
   const naturezaOpts = [
-    { value: 'Tangivel', label: 'Tangivel' },
-    { value: 'Intangivel', label: 'Intangivel' },
+    { value: 'Tangivel', label: 'Tangível' },
+    { value: 'Intangivel', label: 'Intangível' },
   ];
 
   const classeOpts = [
     { value: 'Ambientais', label: 'Ambientais' },
     { value: 'Aprendizagem organizacional e desenvolvimento de capacidades', label: 'Aprendizagem organizacional e desenvolvimento de capacidades' },
-    { value: 'Conformidade / regulatorios', label: 'Conformidade / regulatorios' },
-    { value: 'Economico', label: 'Economico' },
-    { value: 'Estrategicos', label: 'Estrategicos' },
+    { value: 'Conformidade / regulatorios', label: 'Conformidade / regulatórios' },
+    { value: 'Economico', label: 'Econômico' },
+    { value: 'Estrategicos', label: 'Estratégicos' },
     { value: 'Financeiros', label: 'Financeiros' },
-    { value: 'Novos conhecimentos e inovacao', label: 'Novos conhecimentos e inovacao' },
-    { value: 'Operacionais - Ganho Eficiencia', label: 'Operacionais - Ganho Eficiencia' },
+    { value: 'Novos conhecimentos e inovacao', label: 'Novos conhecimentos e inovação' },
+    { value: 'Operacionais - Ganho Eficiencia', label: 'Operacionais - Ganho Eficiência' },
     { value: 'Outros', label: 'Outros' },
     { value: 'Reputacionais', label: 'Reputacionais' },
     { value: 'Sociais', label: 'Sociais' },
@@ -184,21 +184,21 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
   const classeConflitoOpts = [
     { value: 'Conflito de interesses pessoais ou grupais', label: 'Conflito de interesses pessoais ou grupais' },
     { value: 'Conflitos associados com os processos comunicacionais do grupo', label: 'Conflitos associados com os processos comunicacionais do grupo' },
-    { value: 'Conflitos de percepcao do valor e/ou beneficios', label: 'Conflitos de percepcao do valor e/ou beneficios' },
+    { value: 'Conflitos de percepcao do valor e/ou beneficios', label: 'Conflitos de percepção do valor e/ou benefícios' },
     { value: 'Conflitos por diversidade cultural', label: 'Conflitos por diversidade cultural' },
-    { value: 'Conflitos relacionados ao conteudo das atividades e coordenacao', label: 'Conflitos relacionados ao conteudo das atividades e coordenacao' },
+    { value: 'Conflitos relacionados ao conteudo das atividades e coordenacao', label: 'Conflitos relacionados ao conteúdo das atividades e coordenação' },
     { value: 'Conflitos relacionados aos estabelecimentos de prioridades', label: 'Conflitos relacionados aos estabelecimentos de prioridades' },
-    { value: 'Conflitos relacionados com a distribuicao dos beneficios', label: 'Conflitos relacionados com a distribuicao dos beneficios' },
-    { value: 'Conflitos relacionados com diferencas entre expectativas e os resultados obtidos', label: 'Conflitos relacionados com diferencas entre expectativas e os resultados obtidos' },
-    { value: 'Conflitos relacionados com interpretacao de dados e sistema de medicao/avaliacao', label: 'Conflitos relacionados com interpretacao de dados e sistema de medicao/avaliacao' },
+    { value: 'Conflitos relacionados com a distribuicao dos beneficios', label: 'Conflitos relacionados com a distribuição dos benefícios' },
+    { value: 'Conflitos relacionados com diferencas entre expectativas e os resultados obtidos', label: 'Conflitos relacionados com diferenças entre expectativas e os resultados obtidos' },
+    { value: 'Conflitos relacionados com interpretacao de dados e sistema de medicao/avaliacao', label: 'Conflitos relacionados com interpretação de dados e sistema de medição/avaliação' },
     { value: 'Outros', label: 'Outros' },
   ];
 
   const probabilidadeRiscoOpts = [
-    { value: '0-10% Muito improvavel', label: '0-10% Muito improvavel' },
-    { value: '11-30% Improvavel', label: '11-30% Improvavel' },
-    { value: '51-70% Provavel', label: '51-70% Provavel' },
-    { value: '71-90% Muito provavel', label: '71-90% Muito provavel' },
+    { value: '0-10% Muito improvavel', label: '0-10% Muito improvável' },
+    { value: '11-30% Improvavel', label: '11-30% Improvável' },
+    { value: '51-70% Provavel', label: '51-70% Provável' },
+    { value: '71-90% Muito provavel', label: '71-90% Muito provável' },
   ];
 
   const classeSHOpts = [
@@ -214,7 +214,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
     { value: 'Outros', label: 'Outros' },
     { value: 'Priorizador', label: 'Priorizador' },
     { value: 'Sustentador / Mantenedor', label: 'Sustentador / Mantenedor' },
-    { value: 'Usuario / Cliente', label: 'Usuario / Cliente' },
+    { value: 'Usuario / Cliente', label: 'Usuário / Cliente' },
   ];
 
   const poderOpts = [1,2,3,4,5].map(n => ({ value: n, label: String(n) }));
@@ -223,35 +223,35 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
 
   return (
     <div>
-      <StepHeader numero={7} titulo="GADB Beneficios" descricao="Identificacao e definicao dos beneficios" />
+      <StepHeader numero={7} titulo="GADB Benefícios" descricao="Identificação e definição dos benefícios" />
 
       <div className="mb-4 flex justify-end">
         <button onClick={() => { setEditId(null); setForm({ ...empty }); setShowForm(true); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
-          + Novo Beneficio
+          + Novo Benefício
         </button>
       </div>
 
-      <FormModal open={showForm} onClose={closeModal} title={editId ? 'Editar Beneficio' : 'Novo Beneficio'} maxWidth="max-w-4xl">
+      <FormModal open={showForm} onClose={closeModal} title={editId ? 'Editar Benefício' : 'Novo Benefício'} maxWidth="max-w-4xl">
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2"><FormField label="Descricao" value={form.descricao} onChange={(v) => setForm({ ...form, descricao: v })} required /></div>
+            <div className="md:col-span-2"><FormField label="Descrição" value={form.descricao} onChange={(v) => setForm({ ...form, descricao: v })} required /></div>
             <FormField label="Valor Associado" type="select" value={form.valor_id} onChange={(v) => setForm({ ...form, valor_id: v })} options={valoresOpts} searchable />
             <FormField label="Natureza" type="select" value={form.natureza} onChange={(v) => setForm({ ...form, natureza: v })} options={naturezaOpts} />
-            <FormField label="Classe de beneficios" type="select" value={form.classe} onChange={(v) => setForm({ ...form, classe: v })} options={classeOpts} />
+            <FormField label="Classe de benefícios" type="select" value={form.classe} onChange={(v) => setForm({ ...form, classe: v })} options={classeOpts} />
             <FormField label="Classe de conflito" type="select" value={form.classe_conflito} onChange={(v) => setForm({ ...form, classe_conflito: v })} options={classeConflitoOpts} />
             <FormField label="Temporalidade" value={form.temporalidade} onChange={(v) => setForm({ ...form, temporalidade: v })} />
-            <FormField label="Responsavel" type="select" value={form.responsavel_id} onChange={(v) => setForm({ ...form, responsavel_id: v })} options={gestoresOpts} searchable />
-            <FormField label="Como sera realizado" type="textarea" value={form.como_realizar} onChange={(v) => setForm({ ...form, como_realizar: v })} maxLength={200} rows={2} />
+            <FormField label="Responsável" type="select" value={form.responsavel_id} onChange={(v) => setForm({ ...form, responsavel_id: v })} options={gestoresOpts} searchable />
+            <FormField label="Como será realizado" type="textarea" value={form.como_realizar} onChange={(v) => setForm({ ...form, como_realizar: v })} maxLength={200} rows={2} />
             <FormField label="Como identificar / medir" value={form.forma_avaliacao} onChange={(v) => setForm({ ...form, forma_avaliacao: v })} maxLength={200} />
             <FormField label="Status" type="select" value={form.status_realizacao} onChange={(v) => setForm({ ...form, status_realizacao: v })}
-              options={[{ value: 'Planejado', label: 'Planejado' }, { value: 'Em Andamento', label: 'Em Andamento' }, { value: 'Realizado', label: 'Realizado' }, { value: 'Nao Realizado', label: 'Nao Realizado' }]} />
+              options={[{ value: 'Planejado', label: 'Planejado' }, { value: 'Em Andamento', label: 'Em Andamento' }, { value: 'Realizado', label: 'Realizado' }, { value: 'Nao Realizado', label: 'Não Realizado' }]} />
             <FormField label="Quando realizar (meses)" type="number" value={form.quando_realizar} onChange={(v) => setForm({ ...form, quando_realizar: v })} />
-            <FormField label="Frequencia de Revisao" value={form.frequencia_revisao} onChange={(v) => setForm({ ...form, frequencia_revisao: v })} />
-            <FormField label="Proxima Revisao" type="date" value={form.proxima_revisao} onChange={(v) => setForm({ ...form, proxima_revisao: v })} />
+            <FormField label="Frequência de Revisão" value={form.frequencia_revisao} onChange={(v) => setForm({ ...form, frequencia_revisao: v })} />
+            <FormField label="Próxima Revisão" type="date" value={form.proxima_revisao} onChange={(v) => setForm({ ...form, proxima_revisao: v })} />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <FormField label="Riscos (positivos ou negativos) associados a realizacao deste beneficio" type="textarea" value={form.riscos} onChange={(v) => setForm({ ...form, riscos: v })} rows={2} />
+            <FormField label="Riscos (positivos ou negativos) associados à realização deste benefício" type="textarea" value={form.riscos} onChange={(v) => setForm({ ...form, riscos: v })} rows={2} />
             <FormField label="Probabilidade do risco" type="select" value={form.probabilidade_risco} onChange={(v) => setForm({ ...form, probabilidade_risco: v })} options={probabilidadeRiscoOpts} />
           </div>
           <div className="mt-4 flex justify-end gap-3">
@@ -296,7 +296,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
             {(detail.stakeholders || []).length > 0 ? (
               <div className="overflow-x-auto">
                 <div className="flex justify-end mb-2">
-                  <button onClick={handleRecalcSaliencia} className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-4 py-2 text-sm font-medium">Recalcular Saliencia</button>
+                  <button onClick={handleRecalcSaliencia} className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-4 py-2 text-sm font-medium">Recalcular Saliência</button>
                 </div>
                 <table className="w-full"><thead><tr className="bg-gray-50 border-b">
                   <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Nome</th>
@@ -305,9 +305,9 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
                   <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase"><PLULabel label="P" onClick={() => setPluModal('Poder')} /></th>
                   <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase"><PLULabel label="L" onClick={() => setPluModal('Legitimidade')} /></th>
                   <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase"><PLULabel label="U" onClick={() => setPluModal('Urgência')} /></th>
-                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase" title="Saliencia = Poder x Legitimidade x Urgencia">Saliencia (P*L*U)</th>
-                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase" title="Saliencia Normalizada = (P*L*U) / 125 * 100">Saliencia Norm.</th>
-                  <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">Acoes</th>
+                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase" title="Saliência = Poder x Legitimidade x Urgência">Saliência (P*L*U)</th>
+                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase" title="Saliência Normalizada = (P*L*U) / 125 * 100">Saliência Norm.</th>
+                  <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">Ações</th>
                 </tr></thead><tbody className="divide-y">
                   {detail.stakeholders.map(s => {
                     const p = s.poder || 1;
@@ -348,7 +348,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
 
       <PLUInfoModal field={pluModal} onClose={() => setPluModal(null)} />
 
-      <ConfirmDialog open={!!deleteTarget} title="Excluir Beneficio" message={`Deseja excluir "${deleteTarget?.descricao}"?`}
+      <ConfirmDialog open={!!deleteTarget} title="Excluir Benefício" message={`Deseja excluir "${deleteTarget?.descricao}"?`}
         onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />
     </div>
   );

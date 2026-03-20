@@ -24,16 +24,16 @@ const icons = {
 
 const steps = [
   { path: '/', label: 'Leia-me', num: 1, icon: 'book' },
-  { path: '/organizacao', label: 'Organizacao', num: 2, icon: 'building' },
+  { path: '/organizacao', label: 'Organização', num: 2, icon: 'building' },
   { path: '/gestores', label: 'Gestores', num: 3, icon: 'users' },
   { path: '/projetos', label: 'Projetos', num: 4, icon: 'folder' },
   { path: '/stakeholders', label: 'Stakeholders', num: 5, icon: 'handshake' },
   { path: '/valor', label: 'DPD Valor', num: 6, icon: 'diamond' },
-  { path: '/beneficios', label: 'GADB Beneficios', num: 7, icon: 'target' },
-  { path: '/propagacao', label: 'Propagacao', num: 8, icon: 'share' },
+  { path: '/beneficios', label: 'GADB Benefícios', num: 7, icon: 'target' },
+  { path: '/propagacao', label: 'Propagação', num: 8, icon: 'share' },
   { path: '/sinergias', label: 'Sinergias', num: 9, icon: 'link' },
-  { path: '/revisoes', label: 'Revisoes', num: 10, icon: 'calendar' },
-  { path: '/consolidacoes', label: 'Consolidacoes', num: 11, icon: 'chart' },
+  { path: '/revisoes', label: 'Revisões', num: 10, icon: 'calendar' },
+  { path: '/consolidacoes', label: 'Consolidações', num: 11, icon: 'chart' },
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }) {
