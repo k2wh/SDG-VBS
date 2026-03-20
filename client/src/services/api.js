@@ -117,6 +117,12 @@ export const revisoes = {
   atualizarSnapshot: (id) => request(`${API}/revisoes/${id}/atualizar-snapshot`, { method: 'PATCH' }),
   getQuestoesValor: (id) => request(`${API}/revisoes/${id}/questoes-valor`),
   saveQuestoesValor: (id, valorId, data) => request(`${API}/revisoes/${id}/questoes-valor/${valorId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  getQuestoesBeneficio: (id) => request(`${API}/revisoes/${id}/questoes-beneficio`),
+  saveQuestoesBeneficio: (id, beneficioId, data) => request(`${API}/revisoes/${id}/questoes-beneficio/${beneficioId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  getQuestoesPropagacao: (id) => request(`${API}/revisoes/${id}/questoes-propagacao`),
+  saveQuestoesPropagacao: (id, propagacaoId, data) => request(`${API}/revisoes/${id}/questoes-propagacao/${propagacaoId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  getQuestoesSinergia: (id) => request(`${API}/revisoes/${id}/questoes-sinergia`),
+  saveQuestoesSinergia: (id, sinergiaId, data) => request(`${API}/revisoes/${id}/questoes-sinergia/${sinergiaId}`, { method: 'PUT', body: JSON.stringify(data) }),
 };
 
 // Consolidação

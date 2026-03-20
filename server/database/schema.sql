@@ -210,3 +210,69 @@ CREATE TABLE IF NOT EXISTS revisao_valor_questoes (
   atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(revisao_id, valor_id)
 );
+
+CREATE TABLE IF NOT EXISTS revisao_beneficio_questoes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  revisao_id INTEGER NOT NULL REFERENCES revisoes(id) ON DELETE CASCADE,
+  beneficio_id INTEGER NOT NULL REFERENCES beneficios(id) ON DELETE CASCADE,
+  q1 TEXT,
+  q1_justificativa TEXT,
+  q2 TEXT,
+  q2_justificativa TEXT,
+  q3 TEXT,
+  q3_detalhamento TEXT,
+  q4 TEXT,
+  q4_detalhamento TEXT,
+  q5 TEXT,
+  q5_justificativa TEXT,
+  q6 TEXT,
+  q7 TEXT,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(revisao_id, beneficio_id)
+);
+
+CREATE TABLE IF NOT EXISTS revisao_propagacao_questoes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  revisao_id INTEGER NOT NULL REFERENCES revisoes(id) ON DELETE CASCADE,
+  propagacao_id INTEGER NOT NULL REFERENCES propagacoes(id) ON DELETE CASCADE,
+  q1 TEXT,
+  q2 TEXT,
+  q3 TEXT,
+  q3_justificativa TEXT,
+  q4 TEXT,
+  q4_justificativa TEXT,
+  q5 TEXT,
+  q5_justificativa TEXT,
+  q6 TEXT,
+  q6_justificativa TEXT,
+  q7 TEXT,
+  q8 TEXT,
+  q9 TEXT,
+  q9_detalhamento TEXT,
+  q10 TEXT,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(revisao_id, propagacao_id)
+);
+
+CREATE TABLE IF NOT EXISTS revisao_sinergia_questoes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  revisao_id INTEGER NOT NULL REFERENCES revisoes(id) ON DELETE CASCADE,
+  sinergia_id INTEGER NOT NULL REFERENCES sinergias(id) ON DELETE CASCADE,
+  q1 TEXT,
+  q1_beneficio TEXT,
+  q2 TEXT,
+  q2_outros TEXT,
+  q3 TEXT,
+  q3_outros TEXT,
+  q4 TEXT,
+  q4_detalhamento TEXT,
+  q5 TEXT,
+  q5_detalhamento TEXT,
+  q6 TEXT,
+  q6_outros TEXT,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(revisao_id, sinergia_id)
+);

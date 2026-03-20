@@ -445,4 +445,82 @@ router.put('/:id/questoes-valor/:valorId', (req, res) => {
   res.json({ success: true });
 });
 
+// Questões de análise do benefício por revisão
+router.get('/:id/questoes-beneficio', (req, res) => {
+  const rows = db.prepare('SELECT * FROM revisao_beneficio_questoes WHERE revisao_id = ?').all(req.params.id);
+  const map = {};
+  rows.forEach(r => { map[r.beneficio_id] = r; });
+  res.json(map);
+});
+
+router.put('/:id/questoes-beneficio/:beneficioId', (req, res) => {
+  const { q1, q1_justificativa, q2, q2_justificativa, q3, q3_detalhamento, q4, q4_detalhamento, q5, q5_justificativa, q6, q7 } = req.body;
+  const existing = db.prepare('SELECT id FROM revisao_beneficio_questoes WHERE revisao_id = ? AND beneficio_id = ?').get(req.params.id, req.params.beneficioId);
+
+  if (existing) {
+    db.prepare(`UPDATE revisao_beneficio_questoes SET
+      q1 = ?, q1_justificativa = ?, q2 = ?, q2_justificativa = ?,
+      q3 = ?, q3_detalhamento = ?, q4 = ?, q4_detalhamento = ?,
+      q5 = ?, q5_justificativa = ?, q6 = ?, q7 = ?, atualizado_em = CURRENT_TIMESTAMP
+      WHERE id = ?`
+    ).run(q1 || null, q1_justificativa || null, q2 || null, q2_justificativa || null,
+          q3 || null, q3_detalhamento || null, q4 || null, q4_detalhamento || null,
+          q5 || null, q5_justificativa || null, q6 || null, q7 || null, existing.id);
+  } else {
+    db.prepare(`INSERT INTO revisao_beneficio_questoes
+      (revisao_id, beneficio_id, q1, q1_justificativa, q2, q2_justificativa, q3, q3_detalhamento, q4, q4_detalhamento, q5, q5_justificativa, q6, q7)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(req.params.id, req.params.beneficioId,
+          q1 || null, q1_justificativa || null, q2 || null, q2_justificativa || null,
+          q3 || null, q3_detalhamento || null, q4 || null, q4_detalhamento || null,
+          q5 || null, q5_justificativa || null, q6 || null, q7 || null);
+  }
+
+  res.json({ success: true });
+});
+
+// Questões de propagação por revisão
+router.get('/:id/questoes-propagacao', (req, res) => {
+  const rows = db.prepare('SELECT * FROM revisao_propagacao_questoes WHERE revisao_id = ?').all(req.params.id);
+  const map = {};
+  rows.forEach(r => { map[r.propagacao_id] = r; });
+  res.json(map);
+});
+
+router.put('/:id/questoes-propagacao/:propagacaoId', (req, res) => {
+  const d = req.body;
+  const existing = db.prepare('SELECT id FROM revisao_propagacao_questoes WHERE revisao_id = ? AND propagacao_id = ?').get(req.params.id, req.params.propagacaoId);
+  const fields = ['q1','q2','q3','q3_justificativa','q4','q4_justificativa','q5','q5_justificativa','q6','q6_justificativa','q7','q8','q9','q9_detalhamento','q10'];
+  const vals = fields.map(f => d[f] || null);
+
+  if (existing) {
+    db.prepare(`UPDATE revisao_propagacao_questoes SET ${fields.map(f => `${f} = ?`).join(', ')}, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?`).run(...vals, existing.id);
+  } else {
+    db.prepare(`INSERT INTO revisao_propagacao_questoes (revisao_id, propagacao_id, ${fields.join(', ')}) VALUES (?, ?, ${fields.map(() => '?').join(', ')})`).run(req.params.id, req.params.propagacaoId, ...vals);
+  }
+  res.json({ success: true });
+});
+
+// Questões de sinergia por revisão
+router.get('/:id/questoes-sinergia', (req, res) => {
+  const rows = db.prepare('SELECT * FROM revisao_sinergia_questoes WHERE revisao_id = ?').all(req.params.id);
+  const map = {};
+  rows.forEach(r => { map[r.sinergia_id] = r; });
+  res.json(map);
+});
+
+router.put('/:id/questoes-sinergia/:sinergiaId', (req, res) => {
+  const d = req.body;
+  const existing = db.prepare('SELECT id FROM revisao_sinergia_questoes WHERE revisao_id = ? AND sinergia_id = ?').get(req.params.id, req.params.sinergiaId);
+  const fields = ['q1','q1_beneficio','q2','q2_outros','q3','q3_outros','q4','q4_detalhamento','q5','q5_detalhamento','q6','q6_outros'];
+  const vals = fields.map(f => d[f] || null);
+
+  if (existing) {
+    db.prepare(`UPDATE revisao_sinergia_questoes SET ${fields.map(f => `${f} = ?`).join(', ')}, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?`).run(...vals, existing.id);
+  } else {
+    db.prepare(`INSERT INTO revisao_sinergia_questoes (revisao_id, sinergia_id, ${fields.join(', ')}) VALUES (?, ?, ${fields.map(() => '?').join(', ')})`).run(req.params.id, req.params.sinergiaId, ...vals);
+  }
+  res.json({ success: true });
+});
+
 module.exports = router;
