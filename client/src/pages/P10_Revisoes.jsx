@@ -1173,75 +1173,126 @@ export default function P10_Revisoes({ projetoAtivo }) {
       {/* Revision List */}
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Histórico de Revisões</h3>
       {lista.length > 0 ? (
-        <div className="space-y-3">
-          {lista.map((rev) => (
-            <div key={rev.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-gray-800">{rev.nome_arquivo}</p>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      rev.status === 'Encerrado'
-                        ? 'bg-gray-100 text-gray-800'
-                        : 'bg-green-100 text-green-800'
-                    }`}>
-                      {rev.status || 'Aberto'}
-                    </span>
+        <div className="space-y-4">
+          {lista.map((rev) => {
+            const isAberto = !rev.status || rev.status === 'Aberto';
+            return (
+            <div key={rev.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+              {/* Header do card */}
+              <div className={`px-5 py-3 border-b ${isAberto ? 'bg-gradient-to-r from-primary-50 to-blue-50 border-primary-100' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isAberto ? 'bg-primary-100 text-primary-600' : 'bg-gray-200 text-gray-500'}`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                        <path fillRule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zm4.75 6.75a.75.75 0 00-1.5 0v2.546l-.943-1.048a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.114 0l2.25-2.5a.75.75 0 00-1.114-1.004l-.943 1.048V8.75z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-800 text-sm leading-tight">{rev.nome_arquivo}</h4>
+                      {rev.descricao && <p className="text-xs text-gray-500 mt-0.5">{rev.descricao}</p>}
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-500">
-                    {rev.data_revisao} {rev.descricao && `\u2014 ${rev.descricao}`}
-                  </p>
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                    isAberto
+                      ? 'bg-green-100 text-green-700 border border-green-200'
+                      : 'bg-gray-100 text-gray-600 border border-gray-200'
+                  }`}>
+                    {rev.status || 'Aberto'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Conteúdo do card */}
+              <div className="px-5 py-3">
+                <div className="flex items-center gap-6 text-xs text-gray-500 mb-3">
+                  <span className="flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-gray-400">
+                      <path fillRule="evenodd" d="M4 1.75a.75.75 0 01.75.75V3h6.5V2.5a.75.75 0 011.5 0V3h.25A2.75 2.75 0 0115.75 5.75v7.5A2.75 2.75 0 0113 16H3A2.75 2.75 0 01.25 13.25v-7.5A2.75 2.75 0 013 3h.25V2.5A.75.75 0 014 1.75zM1.75 7.25v6A1.25 1.25 0 003 14.5h10a1.25 1.25 0 001.25-1.25v-6H1.75z" clipRule="evenodd" />
+                    </svg>
+                    Data: <strong className="text-gray-700">{rev.data_revisao}</strong>
+                  </span>
                   {rev.etapa_projeto && (
-                    <p className="text-xs text-gray-400 mt-1">Etapa: {rev.etapa_projeto}</p>
+                    <span className="flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-gray-400">
+                        <path d="M8.75 2.75a.75.75 0 00-1.5 0v5.69L5.03 6.22a.75.75 0 00-1.06 1.06l3.5 3.5a.75.75 0 001.06 0l3.5-3.5a.75.75 0 00-1.06-1.06L8.75 8.44V2.75z" />
+                        <path d="M3.5 9.75a.75.75 0 00-1.5 0v1.5A2.75 2.75 0 004.75 14h6.5A2.75 2.75 0 0014 11.25v-1.5a.75.75 0 00-1.5 0v1.5c0 .69-.56 1.25-1.25 1.25h-6.5c-.69 0-1.25-.56-1.25-1.25v-1.5z" />
+                      </svg>
+                      Etapa: <strong className="text-gray-700">{rev.etapa_projeto}</strong>
+                    </span>
                   )}
                   {rev.proxima_revisao_sugerida && (
-                    <p className="text-xs text-gray-400 mt-1">Próxima revisão sugerida: {rev.proxima_revisao_sugerida}</p>
+                    <span className="flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-gray-400">
+                        <path fillRule="evenodd" d="M12.5 9.75A2.75 2.75 0 009.75 7H4.56l2.22-2.22a.75.75 0 00-1.06-1.06l-3.5 3.5a.75.75 0 000 1.06l3.5 3.5a.75.75 0 001.06-1.06L4.56 8.5h5.19c.69 0 1.25.56 1.25 1.25v4.5a.75.75 0 001.5 0v-4.5z" clipRule="evenodd" />
+                      </svg>
+                      Próxima: <strong className="text-gray-700">{rev.proxima_revisao_sugerida}</strong>
+                    </span>
                   )}
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  {(!rev.status || rev.status === 'Aberto') && (
+
+                {/* Ações */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {isAberto && (
                     <button
                       onClick={() => setCicloRevId(rev.id)}
-                      className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-200 hover:bg-primary-100 transition-colors"
                     >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
+                        <path d="M13.488 2.513a1.75 1.75 0 00-2.475 0L6.75 6.774a2.75 2.75 0 00-.596.892l-.848 2.047a.75.75 0 00.98.98l2.047-.848a2.75 2.75 0 00.892-.596l4.261-4.262a1.75 1.75 0 000-2.474z" />
+                        <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0114 9v2.25A2.75 2.75 0 0111.25 14h-6.5A2.75 2.75 0 012 11.25v-6.5A2.75 2.75 0 014.75 2H7a.75.75 0 010 1.5H4.75z" />
+                      </svg>
                       Editar Ciclo
                     </button>
                   )}
                   <button
                     onClick={() => handleViewSnapshot(rev)}
-                    className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 transition-colors"
                   >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
+                      <path d="M8 9.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                      <path fillRule="evenodd" d="M1.38 8.28a.87.87 0 010-.566 7.003 7.003 0 0113.238.006.87.87 0 010 .566A7.003 7.003 0 011.379 8.28zM11 8a3 3 0 11-6 0 3 3 0 016 0z" clipRule="evenodd" />
+                    </svg>
                     Ver Snapshot
                   </button>
                   <button
                     onClick={() => handleExportXlsx(rev)}
                     disabled={exportingId === rev.id}
-                    className="flex items-center gap-1 text-green-600 hover:text-green-800 disabled:opacity-50 text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 disabled:opacity-50 transition-colors"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                      <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
-                      <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
+                      <path d="M8.75 2.75a.75.75 0 00-1.5 0v5.69L5.03 6.22a.75.75 0 00-1.06 1.06l3.5 3.5a.75.75 0 001.06 0l3.5-3.5a.75.75 0 00-1.06-1.06L8.75 8.44V2.75z" />
+                      <path d="M3.5 9.75a.75.75 0 00-1.5 0v1.5A2.75 2.75 0 004.75 14h6.5A2.75 2.75 0 0014 11.25v-1.5a.75.75 0 00-1.5 0v1.5c0 .69-.56 1.25-1.25 1.25h-6.5c-.69 0-1.25-.56-1.25-1.25v-1.5z" />
                     </svg>
                     {exportingId === rev.id ? 'Exportando...' : 'Exportar XLSX'}
                   </button>
-                  {(!rev.status || rev.status === 'Aberto') && (
+
+                  <div className="flex-1" />
+
+                  {isAberto && (
                     <button
                       onClick={async () => { await revisoes.encerrar(rev.id); load(); }}
-                      className="text-amber-600 hover:text-amber-800 text-sm font-medium"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors"
                     >
-                      Encerrar Ciclo
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
+                        <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm.75-10.25a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zM8 12a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                      </svg>
+                      Encerrar
                     </button>
                   )}
                   <button
                     onClick={() => setDeleteTarget(rev)}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors"
                   >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
+                      <path fillRule="evenodd" d="M5 3.25V4H2.75a.75.75 0 000 1.5h.3l.815 8.15A1.5 1.5 0 005.357 15h5.285a1.5 1.5 0 001.493-1.35l.815-8.15h.3a.75.75 0 000-1.5H11v-.75A2.25 2.25 0 008.75 1h-1.5A2.25 2.25 0 005 3.25zm2.25-.75a.75.75 0 00-.75.75V4h3v-.75a.75.75 0 00-.75-.75h-1.5zM6.05 6a.75.75 0 01.787.713l.275 5.5a.75.75 0 01-1.498.075l-.275-5.5A.75.75 0 016.05 6zm3.9 0a.75.75 0 01.712.787l-.275 5.5a.75.75 0 01-1.498-.075l.275-5.5a.75.75 0 01.786-.711z" clipRule="evenodd" />
+                    </svg>
                     Excluir
                   </button>
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
