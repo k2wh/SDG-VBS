@@ -315,7 +315,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
                   const l = s.legitimidade || 1;
                   const u = s.urgencia || 1;
                   const sal = p * l * u;
-                  const salNorm = ((sal / salienciaMax) * 100).toFixed(1);
+                  const salNorm = (sal / salienciaMax).toFixed(3);
                   return (
                     <tr key={s.stakeholder_id} className="hover:bg-gray-50">
                       <td className="px-4 py-2 text-sm">{s.stakeholder_nome || s.nome}</td>
@@ -325,7 +325,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
                       <td className="px-4 py-2 text-sm text-center">{l}</td>
                       <td className="px-4 py-2 text-sm text-center">{u}</td>
                       <td className="px-4 py-2 text-sm text-center font-semibold">{sal}</td>
-                      <td className="px-4 py-2 text-sm text-center">{salNorm}%</td>
+                      <td className="px-4 py-2 text-sm text-center">{salNorm}</td>
                       <td className="px-4 py-2 text-right"><button onClick={() => handleUnlinkSH(s.stakeholder_id)} className="text-red-600 text-sm">Remover</button></td>
                     </tr>
                   );
