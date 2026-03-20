@@ -1,229 +1,220 @@
 import * as XLSX from 'xlsx';
-import { organizacoes, gestores, projetos, stakeholders, valores, beneficios, propagacoes, sinergias, eventos, revisoes } from './api';
+import { revisoes } from './api';
 
-export async function exportarProjetoXlsx(projetoAtivo, projetoNome) {
+/**
+ * Exporta uma revisão completa para XLSX com todas as tabs e respostas dos questionários.
+ */
+export async function exportarRevisaoXlsx(revId, nomeArquivo) {
   const wb = XLSX.utils.book_new();
 
-  // 1. Organizações
-  const orgs = await organizacoes.list();
-  const wsOrgs = XLSX.utils.json_to_sheet(orgs.map(o => ({
-    'Nome': o.nome,
-    'Segmento': o.segmento,
-    'Horizonte Temporal': o.horizonte_temporal,
-    'Alinhamento Estratégico': o.resumo_estrategico,
-  })));
-  XLSX.utils.book_append_sheet(wb, wsOrgs, 'Organizações');
+  // Load all revision data in parallel
+  const [revData, cicloData, qValor, qBeneficio, qPropagacao, qSinergia] = await Promise.all([
+    revisoes.get(revId).catch(() => null),
+    revisoes.getCiclo(revId).catch(() => null),
+    revisoes.getQuestoesValor(revId).catch(() => ({})),
+    revisoes.getQuestoesBeneficio(revId).catch(() => ({})),
+    revisoes.getQuestoesPropagacao(revId).catch(() => ({})),
+    revisoes.getQuestoesSinergia(revId).catch(() => ({})),
+  ]);
 
-  // 2. Gestores
-  const gest = await gestores.list();
-  const wsGest = XLSX.utils.json_to_sheet(gest.map(g => ({
-    'Nome': g.nome,
-    'Cargo': g.cargo,
-    'Departamento': g.departamento,
-    'Email': g.email,
-    'Telefone': g.telefone,
-  })));
-  XLSX.utils.book_append_sheet(wb, wsGest, 'Gestores');
+  const snap = revData?.snapshot_dados || {};
 
-  // 3. Projetos
-  const projs = await projetos.list();
-  const wsProj = XLSX.utils.json_to_sheet(projs.map(p => ({
-    'Código': p.codigo,
-    'Nome': p.nome,
-    'Status': p.status,
-    'Abordagem': p.abordagem_gestao,
-    'Duração': p.duracao,
-    'Gestor': p.gestor_nome,
-    'Patrocinador': p.patrocinador_nome,
-    'Área Responsável': p.area_responsavel,
-    'Objetivo': p.objetivo,
-    'Revisões Previstas': p.numero_revisoes_previstas,
-    'Frequência Revisões': p.frequencia_revisoes,
-  })));
-  XLSX.utils.book_append_sheet(wb, wsProj, 'Projetos');
-
-  if (!projetoAtivo) {
-    downloadWorkbook(wb, 'SGD-VBS_Geral');
-    return;
+  // ── 1. Dados Gerais ──
+  const dadosGerais = [];
+  if (snap.projeto) {
+    const p = snap.projeto;
+    dadosGerais.push({
+      'Código': p.codigo, 'Nome': p.nome, 'Status': p.status,
+      'Abordagem': p.abordagem_gestao, 'Duração': p.duracao,
+      'Área Responsável': p.area_responsavel, 'Objetivo': p.objetivo,
+      'Data Revisão': revData?.data_revisao, 'Descrição Revisão': revData?.descricao,
+      'Status Revisão': revData?.status || 'Aberto',
+      'Etapa Projeto': revData?.etapa_projeto,
+      'Próxima Revisão Sugerida': revData?.proxima_revisao_sugerida,
+    });
   }
+  addSheet(wb, dadosGerais, 'Dados Gerais');
 
-  // 4. Eventos do Projeto
-  const evts = await eventos.listByProjeto(projetoAtivo).catch(() => []);
-  if (evts.length > 0) {
-    const wsEvts = XLSX.utils.json_to_sheet(evts.map(e => ({
-      'Data': e.data_evento,
-      'Tipo': e.tipo_evento,
-      'Título': e.titulo,
-      'Descrição': e.descricao,
-    })));
-    XLSX.utils.book_append_sheet(wb, wsEvts, 'Eventos');
-  }
-
-  // 5. Stakeholders
-  const shs = await stakeholders.list();
-  const wsStk = XLSX.utils.json_to_sheet(shs.map(s => ({
-    'Nome': s.nome,
-    'Papel': s.papel,
-    'Tipo': s.tipo,
-    'Origem': s.origem,
-    'Classe Principal': s.classe_principal,
-    'Contato': s.contato,
-    'Interesses': s.interesses,
-  })));
-  XLSX.utils.book_append_sheet(wb, wsStk, 'Stakeholders');
-
-  // 5b. Stakeholders Vinculados ao Projeto
-  const projData = await projetos.get(projetoAtivo).catch(() => ({}));
-  const vinculados = projData.stakeholders || [];
-  if (vinculados.length > 0) {
-    const wsVinc = XLSX.utils.json_to_sheet(vinculados.map(v => ({
-      'Nome': v.stakeholder_nome || v.nome,
-      'Tipo': v.stakeholder_tipo || v.tipo,
-      'Papel no Projeto': v.papel_no_projeto,
-    })));
-    XLSX.utils.book_append_sheet(wb, wsVinc, 'SH Vinculados');
-  }
-
-  // 6. Valores DPD
-  const vals = await valores.listByProjeto(projetoAtivo).catch(() => []);
-  if (vals.length > 0) {
-    const wsVals = XLSX.utils.json_to_sheet(vals.map(v => ({
-      'Descrição': v.descricao,
-      'Tipo': v.tipo,
-      'Natureza': v.natureza,
-      'Classe de Valor': v.classe_valor,
+  // ── 2. Valores e Stakeholders ──
+  const valoresRows = [];
+  const valStakeholderRows = [];
+  const valoresArr = cicloData?.valores || snap.valores || [];
+  for (const v of valoresArr) {
+    valoresRows.push({
+      'ID': v.id, 'Descrição': v.descricao, 'Tipo': v.tipo,
+      'Natureza': v.natureza, 'Classe': v.classe_valor,
       'Temporalidade': v.temporalidade,
       'Critérios Mensuração': v.criterios_mensuracao,
       'Frequência Revisão': v.frequencia_revisao,
-      'Próxima Revisão': v.proxima_revisao,
-      'Conflitos': v.conflitos,
-      'Classe Conflito': v.classe_conflito,
-      'Riscos': v.riscos,
-      'Probabilidade Risco': v.probabilidade_risco,
-    })));
-    XLSX.utils.book_append_sheet(wb, wsVals, 'Valores DPD');
-
-    // 6b. Valor-Stakeholders (saliência)
-    const valShRows = [];
-    for (const val of vals) {
-      const detail = await valores.get(val.id).catch(() => null);
-      if (detail?.stakeholders) {
-        for (const s of detail.stakeholders) {
-          valShRows.push({
-            'Valor': val.descricao,
-            'Stakeholder': s.stakeholder_nome,
-            'Perspectiva': s.perspectiva,
-            'Classe SH': s.classe_stakeholder,
-            'Poder': s.poder,
-            'Legitimidade': s.legitimidade,
-            'Urgência': s.urgencia,
-            'Saliência (P×L×U)': (s.poder || 0) * (s.legitimidade || 0) * (s.urgencia || 0),
-            'Saliência Normalizada': s.saliencia_normalizada != null ? Number(s.saliencia_normalizada).toFixed(3) : '',
-          });
-        }
-      }
-    }
-    if (valShRows.length > 0) {
-      const wsValSh = XLSX.utils.json_to_sheet(valShRows);
-      XLSX.utils.book_append_sheet(wb, wsValSh, 'Valor-Stakeholders');
+      'Conflitos': v.conflitos, 'Riscos': v.riscos,
+    });
+    // Stakeholders desse valor (do cicloData)
+    const shs = cicloData?.stakeholders_valor?.[v.id] || v.stakeholders || [];
+    for (const s of (Array.isArray(shs) ? shs : [])) {
+      valStakeholderRows.push({
+        'Valor': v.descricao,
+        'Stakeholder': s.stakeholder_nome || s.nome,
+        'Classe': s.classe || s.classe_stakeholder || '',
+        'Poder': s.poder, 'Legitimidade': s.legitimidade, 'Urgência': s.urgencia,
+        'Saliência': (s.poder || 1) * (s.legitimidade || 1) * (s.urgencia || 1),
+        'Saliência Norm.': s.saliencia_normalizada != null ? Number(s.saliencia_normalizada).toFixed(3) : '',
+        'Descontinuado': s.descontinuado ? 'Sim' : 'Não',
+      });
     }
   }
+  addSheet(wb, valoresRows, 'Valores');
+  if (valStakeholderRows.length > 0) addSheet(wb, valStakeholderRows, 'Valor-Stakeholders');
 
-  // 7. Benefícios GADB
-  const bens = await beneficios.listByProjeto(projetoAtivo).catch(() => []);
-  if (bens.length > 0) {
-    const wsBens = XLSX.utils.json_to_sheet(bens.map(b => ({
-      'Descrição': b.descricao,
-      'Valor Associado': b.valor_descricao,
-      'Natureza': b.natureza,
-      'Classe': b.classe,
-      'Temporalidade': b.temporalidade,
-      'Responsável': b.responsavel_nome,
-      'Como Realizar': b.como_realizar,
-      'Forma Avaliação': b.forma_avaliacao,
-      'Status': b.status_realizacao,
-      'Quando Realizar': b.quando_realizar,
-      'Riscos': b.riscos,
-      'Probabilidade Risco': b.probabilidade_risco,
-      'Classe Conflito': b.classe_conflito,
-    })));
-    XLSX.utils.book_append_sheet(wb, wsBens, 'Benefícios GADB');
+  // ── 3. Questões de Valor (Q1-Q7) ──
+  const qValorRows = [];
+  for (const v of valoresArr) {
+    const q = qValor[v.id] || {};
+    if (Object.keys(q).length === 0) continue;
+    qValorRows.push({
+      'Valor': v.descricao,
+      'Q1 - Percebido como relevante': q.q1 || '', 'Q1 Justificativa': q.q1_justificativa || '',
+      'Q2 - Alinhamento estratégico': q.q2 || '', 'Q2 Justificativa': q.q2_justificativa || '',
+      'Q3 - Percepção de valor': q.q3 || '', 'Q3 Justificativa': q.q3_justificativa || '',
+      'Q4 - Critérios adequados': q.q4 || '', 'Q4 Justificativa': q.q4_justificativa || '',
+      'Q5 - Novos fatores': q.q5 || '',
+      'Q6 - Conflitos entre stakeholders': q.q6 || '',
+      'Q7 - Ajustes recomendados': q.q7 || '',
+    });
+  }
+  if (qValorRows.length > 0) addSheet(wb, qValorRows, 'Questões Valor');
 
-    // 7b. Benefício-Stakeholders (saliência)
-    const benShRows = [];
-    for (const ben of bens) {
-      const shs = await beneficios.getStakeholders(ben.id).catch(() => []);
-      for (const s of shs) {
-        const p = s.poder || 1;
-        const l = s.legitimidade || 1;
-        const u = s.urgencia || 1;
-        benShRows.push({
-          'Benefício': ben.descricao,
-          'Stakeholder': s.stakeholder_nome || s.nome,
-          'Papel': s.papel || s.perspectiva,
-          'Classe SH': s.classe,
-          'Poder': p,
-          'Legitimidade': l,
-          'Urgência': u,
-          'Saliência (P×L×U)': p * l * u,
-          'Saliência Normalizada': s.saliencia_normalizada != null ? Number(s.saliencia_normalizada).toFixed(3) : '',
-        });
-      }
-    }
-    if (benShRows.length > 0) {
-      const wsBenSh = XLSX.utils.json_to_sheet(benShRows);
-      XLSX.utils.book_append_sheet(wb, wsBenSh, 'Benef-Stakeholders');
+  // ── 4. Benefícios e Stakeholders ──
+  const beneficiosRows = [];
+  const benStakeholderRows = [];
+  const beneficiosArr = cicloData?.beneficios || snap.beneficios || [];
+  for (const b of beneficiosArr) {
+    beneficiosRows.push({
+      'ID': b.id, 'Descrição': b.descricao, 'Valor': b.valor_descricao || '',
+      'Natureza': b.natureza, 'Classe': b.classe,
+      'Temporalidade': b.temporalidade, 'Status': b.status || b.status_realizacao || '',
+      'Responsável': b.responsavel_nome || '',
+      'Forma Avaliação': b.forma_avaliacao || '',
+    });
+    const shs = cicloData?.stakeholders_beneficio?.[b.id] || b.stakeholders || [];
+    for (const s of (Array.isArray(shs) ? shs : [])) {
+      benStakeholderRows.push({
+        'Benefício': b.descricao,
+        'Stakeholder': s.stakeholder_nome || s.nome,
+        'Classe': s.classe || '', 'Poder': s.poder, 'Legitimidade': s.legitimidade, 'Urgência': s.urgencia,
+        'Saliência': (s.poder || 1) * (s.legitimidade || 1) * (s.urgencia || 1),
+        'Saliência Norm.': s.saliencia_normalizada != null ? Number(s.saliencia_normalizada).toFixed(3) : '',
+        'Descontinuado': s.descontinuado ? 'Sim' : 'Não',
+      });
     }
   }
+  addSheet(wb, beneficiosRows, 'Benefícios');
+  if (benStakeholderRows.length > 0) addSheet(wb, benStakeholderRows, 'Benef-Stakeholders');
 
-  // 8. Propagação
-  const props = await propagacoes.listByProjeto(projetoAtivo).catch(() => []);
-  if (props.length > 0) {
-    const wsProps = XLSX.utils.json_to_sheet(props.map(p => ({
-      'Benefício': p.beneficio_descricao,
-      'Abordagem': p.abordagem,
-      'Stakeholders Estimados': p.stakeholders_estimados,
-      'Períodos': p.periodos,
-      'Cobertura Final (%)': p.cobertura_final,
-      'Registro Propagação': p.registro_propagacao,
-      'Riscos Não Propagação': p.riscos_nao_propagacao,
-      'Efeitos Colaterais': p.efeitos_colaterais,
-    })));
-    XLSX.utils.book_append_sheet(wb, wsProps, 'Propagação');
+  // ── 5. Questões de Benefício (Q1-Q7) ──
+  const qBenRows = [];
+  for (const b of beneficiosArr) {
+    const q = qBeneficio[b.id] || {};
+    if (Object.keys(q).length === 0) continue;
+    qBenRows.push({
+      'Benefício': b.descricao,
+      'Q1 - Entregue': q.q1 || '', 'Q1 Justificativa': q.q1_justificativa || '',
+      'Q2 - Nível realização': q.q2 || '', 'Q2 Justificativa': q.q2_justificativa || '',
+      'Q3 - Novos usos': q.q3 || '', 'Q3 Detalhamento': q.q3_detalhamento || '',
+      'Q4 - Efeitos colaterais': q.q4 || '', 'Q4 Detalhamento': q.q4_detalhamento || '',
+      'Q5 - Avaliação atual': q.q5 || '', 'Q5 Justificativa': q.q5_justificativa || '',
+      'Q6 - Melhorias sugeridas': q.q6 || '',
+      'Q7 - Ajustes recomendados': formatMultiSelect(q.q7), 'Q7 Outros': q.q7_outros || '',
+    });
   }
+  if (qBenRows.length > 0) addSheet(wb, qBenRows, 'Questões Benefício');
 
-  // 9. Sinergias
-  const sins = await sinergias.listByProjeto(projetoAtivo).catch(() => []);
-  if (sins.length > 0) {
-    const wsSins = XLSX.utils.json_to_sheet(sins.map(s => ({
-      'Benefício A': s.beneficio_a_descricao,
-      'Benefício B': s.beneficio_b_descricao,
-      'Tipo Relação': s.tipo_relacao,
-      'Descrição': s.descricao,
-      'Impacto': s.impacto,
-    })));
-    XLSX.utils.book_append_sheet(wb, wsSins, 'Sinergias');
+  // ── 6. Propagação ──
+  const propagacoesArr = cicloData?.propagacoes || snap.propagacoes || [];
+  const propRows = propagacoesArr.map(p => ({
+    'ID': p.id, 'Benefício': p.beneficio_descricao || '',
+    'Abordagem': p.abordagem || '', 'Stakeholders Estimados': p.stakeholders_estimados ?? '',
+    'Períodos': p.periodos ?? '', 'Cobertura Final': p.cobertura_final ?? p.cobertura ?? '',
+    'Registro Propagação': p.registro_propagacao || '',
+    'Riscos': p.riscos_nao_propagacao || '', 'Efeitos Colaterais': p.efeitos_colaterais || '',
+  }));
+  addSheet(wb, propRows, 'Propagação');
+
+  // ── 7. Questões de Propagação (Q1-Q10) ──
+  const qPropRows = [];
+  for (const p of propagacoesArr) {
+    const q = qPropagacao[p.id] || {};
+    if (Object.keys(q).length === 0) continue;
+    qPropRows.push({
+      'Propagação': p.beneficio_descricao || `#${p.id}`,
+      'Q1 - Stakeholders beneficiados': q.q1 || '',
+      'Q2 - Público esperado': q.q2 || '',
+      'Q3 - Classificação propagação': q.q3 || '', 'Q3 Justificativa': q.q3_justificativa || '',
+      'Q4 - Percepção geral': q.q4 || '', 'Q4 Justificativa': q.q4_justificativa || '',
+      'Q5 - Permanência': q.q5 || '', 'Q5 Justificativa': q.q5_justificativa || '',
+      'Q6 - Redução de uso': q.q6 || '', 'Q6 Justificativa': q.q6_justificativa || '',
+      'Q7 - Fatores': q.q7 || '',
+      'Q8 - Mecanismos': q.q8 || '',
+      'Q9 - Efeitos indiretos': q.q9 || '', 'Q9 Detalhamento': q.q9_detalhamento || '',
+      'Q10 - Ajustes': formatMultiSelect(q.q10), 'Q10 Outros': q.q10_outros || '',
+    });
   }
+  if (qPropRows.length > 0) addSheet(wb, qPropRows, 'Questões Propagação');
 
-  // 10. Revisões
-  const revs = await revisoes.listByProjeto(projetoAtivo).catch(() => []);
-  if (revs.length > 0) {
-    const wsRevs = XLSX.utils.json_to_sheet(revs.map(r => ({
-      'Nome': r.nome_arquivo,
-      'Data': r.data_revisao,
-      'Status': r.status || 'Aberto',
-      'Etapa': r.etapa_projeto,
-      'Descrição': r.descricao,
-      'Próxima Revisão Sugerida': r.proxima_revisao_sugerida,
-    })));
-    XLSX.utils.book_append_sheet(wb, wsRevs, 'Revisões');
+  // ── 8. Sinergias ──
+  const sinergiasArr = cicloData?.sinergias || snap.sinergias || [];
+  const sinRows = sinergiasArr.map(s => ({
+    'ID': s.id, 'Benefício A': s.beneficio_a_descricao || '',
+    'Benefício B': s.beneficio_b_descricao || '',
+    'Tipo Relação': s.tipo_relacao || '', 'Descrição': s.descricao || '',
+    'Impacto': s.impacto ?? '',
+  }));
+  addSheet(wb, sinRows, 'Sinergias');
+
+  // ── 9. Questões de Sinergia (Q1-Q6) ──
+  const qSinRows = [];
+  for (const s of sinergiasArr) {
+    const q = qSinergia[s.id] || {};
+    if (Object.keys(q).length === 0) continue;
+    qSinRows.push({
+      'Sinergia': `${s.beneficio_a_descricao || ''} ↔ ${s.beneficio_b_descricao || ''}`,
+      'Q1 - Relação com outros': q.q1 || '', 'Q1 Benefício relacionado': q.q1_beneficio || '',
+      'Q2 - Tipos de relação': formatMultiSelect(q.q2), 'Q2 Outros': q.q2_outros || '',
+      'Q3 - Intensidade sinergia': q.q3 || '', 'Q3 Outros': q.q3_outros || '',
+      'Q4 - Conflitos/sobreposições': q.q4 || '', 'Q4 Detalhamento': q.q4_detalhamento || '',
+      'Q5 - Benefícios emergentes': q.q5 || '', 'Q5 Detalhamento': q.q5_detalhamento || '',
+      'Q6 - Ajustes recomendados': formatMultiSelect(q.q6), 'Q6 Outros': q.q6_outros || '',
+    });
   }
+  if (qSinRows.length > 0) addSheet(wb, qSinRows, 'Questões Sinergia');
 
-  const nomeArquivo = projetoNome
-    ? `SGD-VBS_${projetoNome.replace(/[^a-zA-Z0-9À-ú ]/g, '').replace(/\s+/g, '_')}`
-    : 'SGD-VBS_Projeto';
+  // Download
+  const fileName = nomeArquivo
+    ? `Revisao_${nomeArquivo.replace(/[^a-zA-Z0-9À-ú_ -]/g, '').replace(/\s+/g, '_')}`
+    : `Revisao_${revId}`;
+  downloadWorkbook(wb, fileName);
+}
 
-  downloadWorkbook(wb, nomeArquivo);
+function formatMultiSelect(value) {
+  if (!value) return '';
+  if (value.includes('|||')) return value.split('|||').join(', ');
+  return value;
+}
+
+function addSheet(wb, rows, name) {
+  if (!rows || rows.length === 0) {
+    rows = [{ Info: 'Sem dados' }];
+  }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  // Auto-size columns
+  const maxWidths = {};
+  for (const row of rows) {
+    for (const [key, val] of Object.entries(row)) {
+      const len = Math.max(key.length, String(val || '').length);
+      maxWidths[key] = Math.min(Math.max(maxWidths[key] || 0, len), 60);
+    }
+  }
+  ws['!cols'] = Object.values(maxWidths).map(w => ({ wch: w + 2 }));
+  XLSX.utils.book_append_sheet(wb, ws, name.substring(0, 31));
 }
 
 function downloadWorkbook(wb, filename) {

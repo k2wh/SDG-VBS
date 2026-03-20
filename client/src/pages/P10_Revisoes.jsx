@@ -5,6 +5,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import FormModal from '../components/FormModal';
 import EmptyState from '../components/EmptyState';
 import { revisoes, valores, beneficios } from '../services/api';
+import { exportarRevisaoXlsx } from '../services/exportXlsx';
 
 const BLOCK_TABS = [
   { key: 'dados_gerais', label: 'Dados Gerais' },
@@ -1105,6 +1106,18 @@ export default function P10_Revisoes({ projetoAtivo }) {
   const [snapshot, setSnapshot] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [cicloRevId, setCicloRevId] = useState(null);
+  const [exportingId, setExportingId] = useState(null);
+
+  const handleExportXlsx = async (rev) => {
+    setExportingId(rev.id);
+    try {
+      await exportarRevisaoXlsx(rev.id, rev.nome_arquivo);
+    } catch (err) {
+      console.error('Erro ao exportar revisão:', err);
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   const load = () => {
     if (!projetoAtivo) return;
@@ -1199,6 +1212,17 @@ export default function P10_Revisoes({ projetoAtivo }) {
                     className="text-primary-600 hover:text-primary-800 text-sm font-medium"
                   >
                     Ver Snapshot
+                  </button>
+                  <button
+                    onClick={() => handleExportXlsx(rev)}
+                    disabled={exportingId === rev.id}
+                    className="flex items-center gap-1 text-green-600 hover:text-green-800 disabled:opacity-50 text-sm font-medium"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                      <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+                      <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+                    </svg>
+                    {exportingId === rev.id ? 'Exportando...' : 'Exportar XLSX'}
                   </button>
                   {(!rev.status || rev.status === 'Aberto') && (
                     <button
