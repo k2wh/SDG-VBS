@@ -190,3 +190,23 @@ CREATE TABLE IF NOT EXISTS revisoes (
   proxima_revisao_sugerida DATE,
   criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS revisao_valor_questoes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  revisao_id INTEGER NOT NULL REFERENCES revisoes(id) ON DELETE CASCADE,
+  valor_id INTEGER NOT NULL REFERENCES valores(id) ON DELETE CASCADE,
+  q1 TEXT,
+  q1_justificativa TEXT,
+  q2 TEXT,
+  q2_justificativa TEXT,
+  q3 TEXT,
+  q3_justificativa TEXT,
+  q4 TEXT,
+  q4_justificativa TEXT,
+  q5 TEXT,
+  q6 TEXT,
+  q7 TEXT,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(revisao_id, valor_id)
+);

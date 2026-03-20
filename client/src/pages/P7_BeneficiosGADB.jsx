@@ -3,6 +3,7 @@ import StepHeader from '../components/StepHeader';
 import FormField from '../components/FormField';
 import DataTable from '../components/DataTable';
 import ConfirmDialog from '../components/ConfirmDialog';
+import FormModal from '../components/FormModal';
 import EmptyState from '../components/EmptyState';
 import { beneficios, valores, gestores as gestoresApi, stakeholders as stakeholdersApi } from '../services/api';
 
@@ -17,7 +18,7 @@ const PLU_DESCRIPTIONS = {
 function PLUInfoModal({ field, onClose }) {
   if (!field) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-gray-800">{field}</h3>
@@ -73,6 +74,9 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
 
   if (!projetoAtivo) return <div><StepHeader numero={7} titulo="GADB Beneficios" descricao="Identificacao e definicao dos beneficios" /><EmptyState /></div>;
 
+  const closeModal = () => { setShowForm(false); setEditId(null); setForm({ ...empty }); };
+  const closeDetail = () => { setDetail(null); setLinkSH(''); setLinkPersp(''); setLinkPoder(1); setLinkLegitimidade(1); setLinkUrgencia(1); setLinkClasseSH(''); };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editId) {
@@ -80,9 +84,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
     } else {
       await beneficios.create({ ...form, projeto_id: projetoAtivo });
     }
-    setForm({ ...empty });
-    setEditId(null);
-    setShowForm(false);
+    closeModal();
     load();
   };
 
@@ -224,15 +226,14 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
       <StepHeader numero={7} titulo="GADB Beneficios" descricao="Identificacao e definicao dos beneficios" />
 
       <div className="mb-4 flex justify-end">
-        <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ ...empty }); }}
+        <button onClick={() => { setEditId(null); setForm({ ...empty }); setShowForm(true); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
-          {showForm ? 'Cancelar' : '+ Novo Beneficio'}
+          + Novo Beneficio
         </button>
       </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">{editId ? 'Editar' : 'Novo'} Beneficio</h3>
+      <FormModal open={showForm} onClose={closeModal} title={editId ? 'Editar Beneficio' : 'Novo Beneficio'} maxWidth="max-w-4xl">
+        <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2"><FormField label="Descricao" value={form.descricao} onChange={(v) => setForm({ ...form, descricao: v })} required /></div>
             <FormField label="Valor Associado" type="select" value={form.valor_id} onChange={(v) => setForm({ ...form, valor_id: v })} options={valoresOpts} searchable />
@@ -253,88 +254,87 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
             <FormField label="Riscos (positivos ou negativos) associados a realizacao deste beneficio" type="textarea" value={form.riscos} onChange={(v) => setForm({ ...form, riscos: v })} rows={2} />
             <FormField label="Probabilidade do risco" type="select" value={form.probabilidade_risco} onChange={(v) => setForm({ ...form, probabilidade_risco: v })} options={probabilidadeRiscoOpts} />
           </div>
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-end gap-3">
+            <button type="button" onClick={closeModal} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">Cancelar</button>
             <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
               {editId ? 'Salvar' : 'Cadastrar'}
             </button>
           </div>
         </form>
-      )}
+      </FormModal>
 
       <DataTable columns={columns} data={lista} onEdit={handleEdit} onDelete={(row) => setDeleteTarget(row)}
         actions={(row) => <button onClick={() => openDetail(row)} className="text-primary-600 hover:text-primary-800 text-sm font-medium mr-2">Detalhes</button>} />
 
-      {detail && (
-        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Stakeholders — "{detail.descricao}"</h3>
-            <button onClick={() => setDetail(null)} className="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end mb-4">
-            <div>
-              <FormField label="Stakeholder" type="select" value={linkSH} onChange={setLinkSH}
-                options={allStakeholders.filter(s => !(detail.stakeholders || []).find(v => v.stakeholder_id === s.id)).map(s => ({ value: s.id, label: s.nome }))} searchable />
-            </div>
-            <div>
-              <FormField label="Papel" value={linkPersp} onChange={setLinkPersp} placeholder="Papel do stakeholder" />
-            </div>
-            <div>
-              <FormField label="Classe" type="select" value={linkClasseSH} onChange={setLinkClasseSH} options={classeSHOpts} />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end mb-4">
-            <div>
-              <FormField label={<PLULabel label="Poder" onClick={() => setPluModal('Poder')} />} type="select" value={linkPoder} onChange={(v) => setLinkPoder(Number(v))} options={poderOpts} />
-            </div>
-            <div>
-              <FormField label={<PLULabel label="Legitimidade" onClick={() => setPluModal('Legitimidade')} />} type="select" value={linkLegitimidade} onChange={(v) => setLinkLegitimidade(Number(v))} options={poderOpts} />
-            </div>
-            <div>
-              <FormField label={<PLULabel label="Urgência" onClick={() => setPluModal('Urgência')} />} type="select" value={linkUrgencia} onChange={(v) => setLinkUrgencia(Number(v))} options={poderOpts} />
-            </div>
-            <button onClick={handleLinkSH} disabled={!linkSH} className={`rounded-lg px-4 py-2 text-sm font-medium h-fit ${linkSH ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>Vincular</button>
-          </div>
-          {(detail.stakeholders || []).length > 0 ? (
-            <div className="overflow-x-auto">
-              <div className="flex justify-end mb-2">
-                <button onClick={handleRecalcSaliencia} className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-4 py-2 text-sm font-medium">Recalcular Saliencia</button>
+      <FormModal open={!!detail} onClose={closeDetail} title={`Stakeholders — "${detail?.descricao || ''}"`} maxWidth="max-w-5xl">
+        {detail && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end mb-4">
+              <div>
+                <FormField label="Stakeholder" type="select" value={linkSH} onChange={setLinkSH}
+                  options={allStakeholders.filter(s => !(detail.stakeholders || []).find(v => v.stakeholder_id === s.id)).map(s => ({ value: s.id, label: s.nome }))} searchable />
               </div>
-              <table className="w-full"><thead><tr className="bg-gray-50 border-b">
-                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Nome</th>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Papel</th>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Classe</th>
-                <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase"><PLULabel label="P" onClick={() => setPluModal('Poder')} /></th>
-                <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase"><PLULabel label="L" onClick={() => setPluModal('Legitimidade')} /></th>
-                <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase"><PLULabel label="U" onClick={() => setPluModal('Urgência')} /></th>
-                <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase" title="Saliencia = Poder x Legitimidade x Urgencia">Saliencia (P*L*U)</th>
-                <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase" title="Saliencia Normalizada = (P*L*U) / 125 * 100">Saliencia Norm.</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">Acoes</th>
-              </tr></thead><tbody className="divide-y">
-                {detail.stakeholders.map(s => {
-                  const p = s.poder || 1;
-                  const l = s.legitimidade || 1;
-                  const u = s.urgencia || 1;
-                  const sal = p * l * u;
-                  const salNorm = (sal / salienciaMax).toFixed(3);
-                  return (
-                    <tr key={s.stakeholder_id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 text-sm">{s.stakeholder_nome || s.nome}</td>
-                      <td className="px-4 py-2 text-sm">{s.papel || s.perspectiva || '-'}</td>
-                      <td className="px-4 py-2 text-sm">{s.classe || '-'}</td>
-                      <td className="px-4 py-2 text-sm text-center">{p}</td>
-                      <td className="px-4 py-2 text-sm text-center">{l}</td>
-                      <td className="px-4 py-2 text-sm text-center">{u}</td>
-                      <td className="px-4 py-2 text-sm text-center font-semibold">{sal}</td>
-                      <td className="px-4 py-2 text-sm text-center">{salNorm}</td>
-                      <td className="px-4 py-2 text-right"><button onClick={() => handleUnlinkSH(s.stakeholder_id)} className="text-red-600 text-sm">Remover</button></td>
-                    </tr>
-                  );
-                })}
-              </tbody></table>
+              <div>
+                <FormField label="Papel" value={linkPersp} onChange={setLinkPersp} placeholder="Papel do stakeholder" />
+              </div>
+              <div>
+                <FormField label="Classe" type="select" value={linkClasseSH} onChange={setLinkClasseSH} options={classeSHOpts} />
+              </div>
             </div>
-          ) : <p className="text-gray-400 text-sm">Nenhum stakeholder vinculado.</p>}
-        </div>
-      )}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end mb-4">
+              <div>
+                <FormField label={<PLULabel label="Poder" onClick={() => setPluModal('Poder')} />} type="select" value={linkPoder} onChange={(v) => setLinkPoder(Number(v))} options={poderOpts} />
+              </div>
+              <div>
+                <FormField label={<PLULabel label="Legitimidade" onClick={() => setPluModal('Legitimidade')} />} type="select" value={linkLegitimidade} onChange={(v) => setLinkLegitimidade(Number(v))} options={poderOpts} />
+              </div>
+              <div>
+                <FormField label={<PLULabel label="Urgência" onClick={() => setPluModal('Urgência')} />} type="select" value={linkUrgencia} onChange={(v) => setLinkUrgencia(Number(v))} options={poderOpts} />
+              </div>
+              <button onClick={handleLinkSH} disabled={!linkSH} className={`rounded-lg px-4 py-2 text-sm font-medium h-fit ${linkSH ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>Vincular</button>
+            </div>
+            {(detail.stakeholders || []).length > 0 ? (
+              <div className="overflow-x-auto">
+                <div className="flex justify-end mb-2">
+                  <button onClick={handleRecalcSaliencia} className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-4 py-2 text-sm font-medium">Recalcular Saliencia</button>
+                </div>
+                <table className="w-full"><thead><tr className="bg-gray-50 border-b">
+                  <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Nome</th>
+                  <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Papel</th>
+                  <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Classe</th>
+                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase"><PLULabel label="P" onClick={() => setPluModal('Poder')} /></th>
+                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase"><PLULabel label="L" onClick={() => setPluModal('Legitimidade')} /></th>
+                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase"><PLULabel label="U" onClick={() => setPluModal('Urgência')} /></th>
+                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase" title="Saliencia = Poder x Legitimidade x Urgencia">Saliencia (P*L*U)</th>
+                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase" title="Saliencia Normalizada = (P*L*U) / 125 * 100">Saliencia Norm.</th>
+                  <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">Acoes</th>
+                </tr></thead><tbody className="divide-y">
+                  {detail.stakeholders.map(s => {
+                    const p = s.poder || 1;
+                    const l = s.legitimidade || 1;
+                    const u = s.urgencia || 1;
+                    const sal = p * l * u;
+                    const salNorm = (sal / salienciaMax).toFixed(3);
+                    return (
+                      <tr key={s.stakeholder_id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 text-sm">{s.stakeholder_nome || s.nome}</td>
+                        <td className="px-4 py-2 text-sm">{s.papel || s.perspectiva || '-'}</td>
+                        <td className="px-4 py-2 text-sm">{s.classe || '-'}</td>
+                        <td className="px-4 py-2 text-sm text-center">{p}</td>
+                        <td className="px-4 py-2 text-sm text-center">{l}</td>
+                        <td className="px-4 py-2 text-sm text-center">{u}</td>
+                        <td className="px-4 py-2 text-sm text-center font-semibold">{sal}</td>
+                        <td className="px-4 py-2 text-sm text-center">{salNorm}</td>
+                        <td className="px-4 py-2 text-right"><button onClick={() => handleUnlinkSH(s.stakeholder_id)} className="text-red-600 text-sm">Remover</button></td>
+                      </tr>
+                    );
+                  })}
+                </tbody></table>
+              </div>
+            ) : <p className="text-gray-400 text-sm">Nenhum stakeholder vinculado.</p>}
+          </>
+        )}
+      </FormModal>
 
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium flex items-center gap-2 transition-all ${

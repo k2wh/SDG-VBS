@@ -115,6 +115,8 @@ export const revisoes = {
   getCiclo: (id) => request(`${API}/revisoes/${id}/ciclo`),
   salvarBloco: (id, data) => request(`${API}/revisoes/${id}/salvar-bloco`, { method: 'PATCH', body: JSON.stringify(data) }),
   atualizarSnapshot: (id) => request(`${API}/revisoes/${id}/atualizar-snapshot`, { method: 'PATCH' }),
+  getQuestoesValor: (id) => request(`${API}/revisoes/${id}/questoes-valor`),
+  saveQuestoesValor: (id, valorId, data) => request(`${API}/revisoes/${id}/questoes-valor/${valorId}`, { method: 'PUT', body: JSON.stringify(data) }),
 };
 
 // Consolidação

@@ -3,6 +3,7 @@ import StepHeader from '../components/StepHeader';
 import FormField from '../components/FormField';
 import DataTable from '../components/DataTable';
 import ConfirmDialog from '../components/ConfirmDialog';
+import FormModal from '../components/FormModal';
 import EmptyState from '../components/EmptyState';
 import { stakeholders as api, projetos } from '../services/api';
 
@@ -26,6 +27,8 @@ export default function P5_Stakeholders({ projetoAtivo }) {
   };
   useEffect(() => { load(); }, [projetoAtivo]);
 
+  const closeModal = () => { setShowForm(false); setEditId(null); setForm({ ...empty }); };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editId) {
@@ -33,9 +36,7 @@ export default function P5_Stakeholders({ projetoAtivo }) {
     } else {
       await api.create(form);
     }
-    setForm({ ...empty });
-    setEditId(null);
-    setShowForm(false);
+    closeModal();
     load();
   };
 
@@ -76,15 +77,14 @@ export default function P5_Stakeholders({ projetoAtivo }) {
       <StepHeader numero={5} titulo="Stakeholders" descricao="Cadastro central de stakeholders e avaliação de saliência" />
 
       <div className="mb-4 flex justify-end">
-        <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ ...empty }); }}
+        <button onClick={() => { setEditId(null); setForm({ ...empty }); setShowForm(true); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors">
-          {showForm ? 'Cancelar' : '+ Novo Stakeholder'}
+          + Novo Stakeholder
         </button>
       </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">{editId ? 'Editar' : 'Novo'} Stakeholder</h3>
+      <FormModal open={showForm} onClose={closeModal} title={editId ? 'Editar Stakeholder' : 'Novo Stakeholder'} maxWidth="max-w-2xl">
+        <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField label="Nome" value={form.nome} onChange={(v) => setForm({ ...form, nome: v })} required />
             <FormField label="Papel" value={form.papel} onChange={(v) => setForm({ ...form, papel: v })} />
@@ -112,13 +112,14 @@ export default function P5_Stakeholders({ projetoAtivo }) {
           <div className="mt-4">
             <FormField label="Interesses" type="textarea" value={form.interesses} onChange={(v) => setForm({ ...form, interesses: v })} />
           </div>
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-end gap-3">
+            <button type="button" onClick={closeModal} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">Cancelar</button>
             <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
               {editId ? 'Salvar Alterações' : 'Cadastrar'}
             </button>
           </div>
         </form>
-      )}
+      </FormModal>
 
       <DataTable columns={columns} data={lista} onEdit={handleEdit} onDelete={(row) => setDeleteTarget(row)} />
 

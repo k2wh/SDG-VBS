@@ -411,4 +411,38 @@ router.get('/consolidacao/projeto/:projetoId', (req, res) => {
   });
 });
 
+// Questões de análise do valor por revisão
+router.get('/:id/questoes-valor', (req, res) => {
+  const rows = db.prepare('SELECT * FROM revisao_valor_questoes WHERE revisao_id = ?').all(req.params.id);
+  const map = {};
+  rows.forEach(r => { map[r.valor_id] = r; });
+  res.json(map);
+});
+
+router.put('/:id/questoes-valor/:valorId', (req, res) => {
+  const { q1, q1_justificativa, q2, q2_justificativa, q3, q3_justificativa, q4, q4_justificativa, q5, q6, q7 } = req.body;
+  const existing = db.prepare('SELECT id FROM revisao_valor_questoes WHERE revisao_id = ? AND valor_id = ?').get(req.params.id, req.params.valorId);
+
+  if (existing) {
+    db.prepare(`UPDATE revisao_valor_questoes SET
+      q1 = ?, q1_justificativa = ?, q2 = ?, q2_justificativa = ?,
+      q3 = ?, q3_justificativa = ?, q4 = ?, q4_justificativa = ?,
+      q5 = ?, q6 = ?, q7 = ?, atualizado_em = CURRENT_TIMESTAMP
+      WHERE id = ?`
+    ).run(q1 || null, q1_justificativa || null, q2 || null, q2_justificativa || null,
+          q3 || null, q3_justificativa || null, q4 || null, q4_justificativa || null,
+          q5 || null, q6 || null, q7 || null, existing.id);
+  } else {
+    db.prepare(`INSERT INTO revisao_valor_questoes
+      (revisao_id, valor_id, q1, q1_justificativa, q2, q2_justificativa, q3, q3_justificativa, q4, q4_justificativa, q5, q6, q7)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(req.params.id, req.params.valorId,
+          q1 || null, q1_justificativa || null, q2 || null, q2_justificativa || null,
+          q3 || null, q3_justificativa || null, q4 || null, q4_justificativa || null,
+          q5 || null, q6 || null, q7 || null);
+  }
+
+  res.json({ success: true });
+});
+
 module.exports = router;

@@ -3,7 +3,7 @@ export default function ConfirmDialog({ open, title, message, onConfirm, onCance
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onCancel} />
       <div className="relative bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
         <h3 className="text-lg font-semibold text-gray-800 mb-2">{title || 'Confirmar'}</h3>
         <p className="text-gray-600 text-sm mb-6">{message || 'Tem certeza que deseja continuar?'}</p>

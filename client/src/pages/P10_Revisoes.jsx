@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import StepHeader from '../components/StepHeader';
 import FormField from '../components/FormField';
 import ConfirmDialog from '../components/ConfirmDialog';
+import FormModal from '../components/FormModal';
 import EmptyState from '../components/EmptyState';
 import { revisoes, valores, beneficios } from '../services/api';
 
@@ -238,7 +239,125 @@ function BlockDadosGerais({ cicloData, onSave }) {
   );
 }
 
-function BlockValoresStakeholders({ cicloData, stakeholdersMap, onStakeholdersChange, onRecalcular, onSave }) {
+const VALOR_QUESTIONS = [
+  { key: 'q1', label: 'Q1 - O valor inicialmente proposto para o projeto continua sendo percebido como relevante pelos principais stakeholders?', type: 'select', options: ['Sim', 'Não'], hasJustificativa: true },
+  { key: 'q2', label: 'Q2 - Há alinhamento entre os objetivos estratégicos com este valor?', type: 'select', options: ['Sim', 'Não'], hasJustificativa: true },
+  { key: 'q3', label: 'Q3 - Houve redução, estabilização ou ampliação da percepção de valor desde a última revisão?', type: 'select', options: ['Não houve criação deste valor até o momento', 'Houve criação deste valor', 'O valor está sendo criado e observa-se crescimento'], hasJustificativa: true },
+  { key: 'q4', label: 'Q4 - Os critérios e indicadores usados para medir este valor continuam adequados para representar a realidade atual do projeto?', type: 'select', options: ['Sim', 'Não'], hasJustificativa: true },
+  { key: 'q5', label: 'Q5 - Há novos fatores internos ou externos que estejam alterando a importância atribuída ao valor do projeto?', type: 'textarea', placeholder: 'Se sim, especifique' },
+  { key: 'q6', label: 'Q6 - Existem conflitos entre stakeholders que estejam enfraquecendo a convergência sobre o valor do projeto?', type: 'textarea', placeholder: 'Se sim, mencionar' },
+  { key: 'q7', label: 'Q7 - Que ajustes devem ser feitos no projeto para preservar, recuperar ou ampliar a criação do valor no próximo ciclo?', type: 'textarea', placeholder: 'Descrever ajustes recomendados' },
+];
+
+function ValorQuestionnaire({ valorId, questoesMap, onQuestoesChange }) {
+  const [open, setOpen] = useState(false);
+  const data = questoesMap[valorId] || {};
+
+  const set = (field, value) => {
+    onQuestoesChange(valorId, { ...data, [field]: value });
+  };
+
+  const answeredCount = VALOR_QUESTIONS.filter(q => {
+    if (q.hasJustificativa) return data[q.key];
+    return data[q.key];
+  }).length;
+
+  return (
+    <div className="mt-4 rounded-xl overflow-hidden border border-emerald-200 shadow-sm">
+      {/* Header */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 transition-all text-left"
+      >
+        <span className="text-sm font-bold text-emerald-800 flex items-center gap-2.5">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-emerald-600">
+            <path fillRule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zm4.75 6.75a.75.75 0 00-1.5 0v2.546l-.943-1.048a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.114 0l2.25-2.5a.75.75 0 00-1.114-1.004l-.943 1.048V8.75z" clipRule="evenodd" />
+          </svg>
+          Questões para análise do valor
+          <span className={`transform transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+              <path fillRule="evenodd" d="M4.22 6.22a.75.75 0 011.06 0L8 8.94l2.72-2.72a.75.75 0 111.06 1.06l-3.25 3.25a.75.75 0 01-1.06 0L4.22 7.28a.75.75 0 010-1.06z" clipRule="evenodd" />
+            </svg>
+          </span>
+        </span>
+        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+          answeredCount === VALOR_QUESTIONS.length
+            ? 'bg-emerald-200 text-emerald-800'
+            : answeredCount > 0
+              ? 'bg-amber-100 text-amber-700'
+              : 'bg-gray-100 text-gray-500'
+        }`}>
+          {answeredCount}/{VALOR_QUESTIONS.length}
+        </span>
+      </button>
+
+      {/* Questions */}
+      {open && (
+        <div className="bg-white divide-y divide-gray-100">
+          {VALOR_QUESTIONS.map((q, idx) => {
+            const isAnswered = q.hasJustificativa ? !!data[q.key] : !!data[q.key];
+            return (
+              <div key={q.key} className="px-5 py-4 hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-start gap-3 mb-3">
+                  <span className={`shrink-0 mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
+                    isAnswered
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-gray-100 text-gray-400'
+                  }`}>
+                    {idx + 1}
+                  </span>
+                  <p className="text-sm font-medium text-gray-800 leading-relaxed">{q.label.replace(/^Q\d+ - /, '')}</p>
+                </div>
+
+                {q.type === 'select' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 ml-10">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Resposta</label>
+                      <select
+                        value={data[q.key] || ''}
+                        onChange={(e) => set(q.key, e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all hover:border-gray-400"
+                      >
+                        <option value="">Selecione</option>
+                        {q.options.map((opt, i) => (
+                          <option key={opt} value={opt}>{i + 1}. {opt}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {q.hasJustificativa && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Justifique sua resposta</label>
+                        <textarea
+                          value={data[`${q.key}_justificativa`] || ''}
+                          onChange={(e) => set(`${q.key}_justificativa`, e.target.value)}
+                          placeholder="Justifique sua resposta..."
+                          rows={2}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all hover:border-gray-400 resize-none"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="ml-10">
+                    <textarea
+                      value={data[q.key] || ''}
+                      onChange={(e) => set(q.key, e.target.value)}
+                      placeholder={q.placeholder}
+                      rows={3}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all hover:border-gray-400 resize-none"
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BlockValoresStakeholders({ cicloData, stakeholdersMap, onStakeholdersChange, onRecalcular, onSave, questoesMap, onQuestoesChange }) {
   const valoresList = cicloData.valores || [];
   const allStakeholders = cicloData.allStakeholders || [];
 
@@ -271,6 +390,11 @@ function BlockValoresStakeholders({ cicloData, stakeholdersMap, onStakeholdersCh
               stakeholdersList={stakeholdersMap[`valor_${val.id}`] || []}
               allStakeholders={allStakeholders}
               onStakeholdersChange={(id, list) => onStakeholdersChange(`valor_${id}`, list)}
+            />
+            <ValorQuestionnaire
+              valorId={val.id}
+              questoesMap={questoesMap}
+              onQuestoesChange={onQuestoesChange}
             />
           </div>
         ))
@@ -423,13 +547,13 @@ function CycleEditorModal({ revId, onClose, onReload }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [stakeholdersMap, setStakeholdersMap] = useState({});
+  const [questoesMap, setQuestoesMap] = useState({});
 
   const loadCiclo = async () => {
     setLoading(true);
     try {
       const data = await revisoes.getCiclo(revId);
       setCicloData(data);
-      // Build stakeholders map keyed by "valor_{id}" and "beneficio_{id}"
       const map = {};
       (data.valores || []).forEach((val) => {
         map[`valor_${val.id}`] = val.stakeholders || [];
@@ -438,11 +562,19 @@ function CycleEditorModal({ revId, onClose, onReload }) {
         map[`beneficio_${ben.id}`] = ben.stakeholders || [];
       });
       setStakeholdersMap(map);
+
+      // Load questões
+      const qMap = await revisoes.getQuestoesValor(revId).catch(() => ({}));
+      setQuestoesMap(qMap);
     } catch (err) {
       console.error('Erro ao carregar ciclo:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleQuestoesChange = (valorId, data) => {
+    setQuestoesMap(prev => ({ ...prev, [valorId]: data }));
   };
 
   useEffect(() => {
@@ -472,7 +604,6 @@ function CycleEditorModal({ revId, onClose, onReload }) {
       let dados = { ...extraData };
 
       if (blockKey === 'valores_stakeholders') {
-        // Save each valor's stakeholders via individual API calls
         const valoresIds = (cicloData.valores || []).map((v) => v.id);
         for (const vId of valoresIds) {
           const shs = stakeholdersMap[`valor_${vId}`] || [];
@@ -495,6 +626,14 @@ function CycleEditorModal({ revId, onClose, onReload }) {
           }
         }
         dados.valores_stakeholders = stakeholdersMap;
+
+        // Save questões for each valor
+        for (const vId of valoresIds) {
+          const qData = questoesMap[vId];
+          if (qData) {
+            await revisoes.saveQuestoesValor(revId, vId, qData);
+          }
+        }
       }
 
       if (blockKey === 'beneficios_stakeholders') {
@@ -545,109 +684,115 @@ function CycleEditorModal({ revId, onClose, onReload }) {
 
   if (loading || !cicloData) {
     return (
-      <div className="fixed inset-0 z-50 bg-white flex items-center justify-center">
-        <div className="text-gray-500 text-sm">Carregando dados do ciclo...</div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+        <div className="relative text-gray-500 text-sm bg-white rounded-lg px-6 py-4 shadow-lg">Carregando dados do ciclo...</div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col">
-      {/* Header */}
-      <div className="border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-between shrink-0">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800">
-            Editar Ciclo - {cicloData.revisao?.nome_arquivo || `Revisao #${revId}`}
-          </h2>
-          <p className="text-sm text-gray-500">{cicloData.revisao?.data_revisao}</p>
-        </div>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200 bg-gray-50 px-6 shrink-0">
-        <div className="flex gap-1">
-          {BLOCK_TABS.map((tab, idx) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveBlock(idx)}
-              className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors ${
-                activeBlock === idx
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        {saving && (
-          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-700">
-            Salvando...
+    <div className="fixed inset-0 z-50 flex flex-col">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+      <div className="relative flex flex-col bg-white mx-4 my-4 rounded-xl shadow-xl overflow-hidden flex-1">
+        {/* Header */}
+        <div className="border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-between shrink-0">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">
+              Editar Ciclo - {cicloData.revisao?.nome_arquivo || `Revisao #${revId}`}
+            </h2>
+            <p className="text-sm text-gray-500">{cicloData.revisao?.data_revisao}</p>
           </div>
-        )}
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
 
-        {activeBlock === 0 && (
-          <BlockDadosGerais
-            cicloData={cicloData}
-            onSave={(dados) => handleSaveBlock('dados_gerais', dados)}
-          />
-        )}
+        {/* Tabs */}
+        <div className="border-b border-gray-200 bg-gray-50 px-6 shrink-0">
+          <div className="flex gap-1">
+            {BLOCK_TABS.map((tab, idx) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveBlock(idx)}
+                className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors ${
+                  activeBlock === idx
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        {activeBlock === 1 && (
-          <BlockValoresStakeholders
-            cicloData={cicloData}
-            stakeholdersMap={stakeholdersMap}
-            onStakeholdersChange={handleStakeholdersChange}
-            onRecalcular={handleRecalcular}
-            onSave={() => handleSaveBlock('valores_stakeholders')}
-          />
-        )}
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          {saving && (
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-700">
+              Salvando...
+            </div>
+          )}
 
-        {activeBlock === 2 && (
-          <BlockBeneficiosStakeholders
-            cicloData={cicloData}
-            stakeholdersMap={stakeholdersMap}
-            onStakeholdersChange={handleStakeholdersChange}
-            onRecalcular={handleRecalcular}
-            onSave={() => handleSaveBlock('beneficios_stakeholders')}
-          />
-        )}
+          {activeBlock === 0 && (
+            <BlockDadosGerais
+              cicloData={cicloData}
+              onSave={(dados) => handleSaveBlock('dados_gerais', dados)}
+            />
+          )}
 
-        {activeBlock === 3 && (
-          <BlockPropagacao
-            cicloData={cicloData}
-            onSave={() => handleSaveBlock('propagacao')}
-          />
-        )}
+          {activeBlock === 1 && (
+            <BlockValoresStakeholders
+              cicloData={cicloData}
+              stakeholdersMap={stakeholdersMap}
+              onStakeholdersChange={handleStakeholdersChange}
+              onRecalcular={handleRecalcular}
+              onSave={() => handleSaveBlock('valores_stakeholders')}
+              questoesMap={questoesMap}
+              onQuestoesChange={handleQuestoesChange}
+            />
+          )}
 
-        {activeBlock === 4 && (
-          <BlockSinergias
-            cicloData={cicloData}
-            onSave={() => handleSaveBlock('sinergias')}
-          />
-        )}
-      </div>
+          {activeBlock === 2 && (
+            <BlockBeneficiosStakeholders
+              cicloData={cicloData}
+              stakeholdersMap={stakeholdersMap}
+              onStakeholdersChange={handleStakeholdersChange}
+              onRecalcular={handleRecalcular}
+              onSave={() => handleSaveBlock('beneficios_stakeholders')}
+            />
+          )}
 
-      {/* Bottom bar */}
-      <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-between shrink-0">
-        <button
-          onClick={handleAtualizarSnapshot}
-          disabled={saving}
-          className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-lg px-5 py-2 text-sm font-medium"
-        >
-          Atualizar Snapshot
-        </button>
-        <button
-          onClick={() => { onReload(); onClose(); }}
-          className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg px-5 py-2 text-sm font-medium"
-        >
-          Fechar
-        </button>
+          {activeBlock === 3 && (
+            <BlockPropagacao
+              cicloData={cicloData}
+              onSave={() => handleSaveBlock('propagacao')}
+            />
+          )}
+
+          {activeBlock === 4 && (
+            <BlockSinergias
+              cicloData={cicloData}
+              onSave={() => handleSaveBlock('sinergias')}
+            />
+          )}
+        </div>
+
+        {/* Bottom bar */}
+        <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-between shrink-0">
+          <button
+            onClick={handleAtualizarSnapshot}
+            disabled={saving}
+            className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-lg px-5 py-2 text-sm font-medium"
+          >
+            Atualizar Snapshot
+          </button>
+          <button
+            onClick={() => { onReload(); onClose(); }}
+            className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg px-5 py-2 text-sm font-medium"
+          >
+            Fechar
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -656,6 +801,7 @@ function CycleEditorModal({ revId, onClose, onReload }) {
 export default function P10_Revisoes({ projetoAtivo }) {
   const [lista, setLista] = useState([]);
   const [descricao, setDescricao] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [snapshot, setSnapshot] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [cicloRevId, setCicloRevId] = useState(null);
@@ -672,6 +818,7 @@ export default function P10_Revisoes({ projetoAtivo }) {
   const handleCreate = async () => {
     await revisoes.create(projetoAtivo, { descricao });
     setDescricao('');
+    setShowCreateModal(false);
     load();
   };
 
@@ -690,21 +837,25 @@ export default function P10_Revisoes({ projetoAtivo }) {
     <div>
       <StepHeader numero={10} titulo="Revisoes" descricao="Ciclos de revisao continua - gere snapshots periodicos" />
 
-      {/* Create Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Gerar Nova Revisao</h3>
+      <div className="mb-6 flex justify-end">
+        <button onClick={() => setShowCreateModal(true)}
+          className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors">
+          + Nova Revisão
+        </button>
+      </div>
+
+      <FormModal open={showCreateModal} onClose={() => { setShowCreateModal(false); setDescricao(''); }} title="Gerar Nova Revisão" maxWidth="max-w-xl">
         <p className="text-sm text-gray-500 mb-4">
           Uma revisao captura um snapshot completo de todos os dados do projeto neste momento (stakeholders, valores, beneficios, propagacoes e sinergias).
         </p>
-        <div className="flex gap-3 items-end">
-          <div className="flex-1">
-            <FormField label="Notas da Revisao (opcional)" value={descricao} onChange={setDescricao} placeholder="Observacoes sobre esta revisao..." />
-          </div>
-          <button onClick={handleCreate} className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-6 py-2 text-sm font-medium h-fit">
-            Gerar Revisao
+        <FormField label="Notas da Revisão (opcional)" value={descricao} onChange={setDescricao} placeholder="Observações sobre esta revisão..." />
+        <div className="mt-4 flex justify-end gap-3">
+          <button type="button" onClick={() => { setShowCreateModal(false); setDescricao(''); }} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">Cancelar</button>
+          <button onClick={handleCreate} className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-6 py-2 text-sm font-medium">
+            Gerar Revisão
           </button>
         </div>
-      </div>
+      </FormModal>
 
       {/* Revision List */}
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Historico de Revisoes</h3>
@@ -775,45 +926,36 @@ export default function P10_Revisoes({ projetoAtivo }) {
       )}
 
       {/* Snapshot Viewer Modal */}
-      {snapshot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setSnapshot(null)} />
-          <div className="relative bg-white rounded-xl shadow-xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Snapshot - {snapshot.nome_arquivo}</h3>
-              <button onClick={() => setSnapshot(null)} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+      <FormModal open={!!snapshot} onClose={() => setSnapshot(null)} title={`Snapshot - ${snapshot?.nome_arquivo || ''}`} maxWidth="max-w-4xl">
+        {snapshot?.snapshot_dados && (
+          <div className="space-y-4 text-sm">
+            <div>
+              <h4 className="font-semibold text-primary-700 mb-2">Projeto</h4>
+              <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.projeto, null, 2)}</pre>
             </div>
-            {snapshot.snapshot_dados && (
-              <div className="space-y-4 text-sm">
-                <div>
-                  <h4 className="font-semibold text-primary-700 mb-2">Projeto</h4>
-                  <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.projeto, null, 2)}</pre>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-primary-700 mb-2">Stakeholders ({snapshot.snapshot_dados.stakeholders?.length || 0})</h4>
-                  <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.stakeholders, null, 2)}</pre>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-primary-700 mb-2">Valores ({snapshot.snapshot_dados.valores?.length || 0})</h4>
-                  <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.valores, null, 2)}</pre>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-primary-700 mb-2">Beneficios ({snapshot.snapshot_dados.beneficios?.length || 0})</h4>
-                  <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.beneficios, null, 2)}</pre>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-primary-700 mb-2">Propagacoes ({snapshot.snapshot_dados.propagacoes?.length || 0})</h4>
-                  <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.propagacoes, null, 2)}</pre>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-primary-700 mb-2">Sinergias ({snapshot.snapshot_dados.sinergias?.length || 0})</h4>
-                  <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.sinergias, null, 2)}</pre>
-                </div>
-              </div>
-            )}
+            <div>
+              <h4 className="font-semibold text-primary-700 mb-2">Stakeholders ({snapshot.snapshot_dados.stakeholders?.length || 0})</h4>
+              <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.stakeholders, null, 2)}</pre>
+            </div>
+            <div>
+              <h4 className="font-semibold text-primary-700 mb-2">Valores ({snapshot.snapshot_dados.valores?.length || 0})</h4>
+              <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.valores, null, 2)}</pre>
+            </div>
+            <div>
+              <h4 className="font-semibold text-primary-700 mb-2">Beneficios ({snapshot.snapshot_dados.beneficios?.length || 0})</h4>
+              <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.beneficios, null, 2)}</pre>
+            </div>
+            <div>
+              <h4 className="font-semibold text-primary-700 mb-2">Propagacoes ({snapshot.snapshot_dados.propagacoes?.length || 0})</h4>
+              <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.propagacoes, null, 2)}</pre>
+            </div>
+            <div>
+              <h4 className="font-semibold text-primary-700 mb-2">Sinergias ({snapshot.snapshot_dados.sinergias?.length || 0})</h4>
+              <pre className="bg-gray-50 p-3 rounded-lg overflow-x-auto text-xs">{JSON.stringify(snapshot.snapshot_dados.sinergias, null, 2)}</pre>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </FormModal>
 
       {/* Cycle Editor Modal */}
       {cicloRevId && (
