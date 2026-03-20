@@ -17,4 +17,13 @@ const schemaPath = path.join(__dirname, 'schema.sql');
 const schema = fs.readFileSync(schemaPath, 'utf-8');
 db.exec(schema);
 
+// Seed admin user if no users exist
+const bcrypt = require('bcryptjs');
+const userCount = db.prepare('SELECT COUNT(*) as c FROM usuarios').get();
+if (userCount.c === 0) {
+  const hash = bcrypt.hashSync('admin123', 10);
+  db.prepare('INSERT INTO usuarios (nome, email, senha_hash) VALUES (?, ?, ?)').run('Administrador', 'admin@sdgvbs.com', hash);
+  console.log('Usuario admin criado: admin@sdgvbs.com / admin123');
+}
+
 module.exports = db;

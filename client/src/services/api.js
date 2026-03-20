@@ -1,16 +1,27 @@
 const API = '/api';
 
+function getToken() {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+}
+
 async function request(url, options = {}) {
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
+  const token = getToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(url, { headers, ...options });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Erro desconhecido' }));
     throw new Error(err.error || `HTTP ${res.status}`);
   }
   return res.json();
 }
+
+// Autenticação
+export const auth = {
+  login: (email, senha) => request(`${API}/auth/login`, { method: 'POST', body: JSON.stringify({ email, senha }) }),
+  me: () => request(`${API}/auth/me`),
+};
 
 // Organizações
 export const organizacoes = {
