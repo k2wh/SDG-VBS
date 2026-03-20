@@ -416,7 +416,7 @@ const BENEFICIO_QUESTIONS = [
   { key: 'q4', label: 'Q4 - Efeitos colaterais', type: 'select', options: ['Nenhum efeito colateral identificado', 'Efeitos colaterais positivos', 'Efeitos colaterais negativos'], justKey: 'q4_detalhamento', justPlaceholder: 'Descrever os efeitos observados' },
   { key: 'q5', label: 'Q5 - Como você avalia o benefício atualmente?', type: 'select', options: ['Desconhecem o benefício', 'Não percebem', 'Percebem moderadamente', 'Reconhecem como alto'], justKey: 'q5_justificativa' },
   { key: 'q6', label: 'Q6 - Que melhorias poderiam aumentar a efetividade ou o impacto deste benefício?', type: 'textarea', placeholder: 'Sugestões de melhorias técnicas, operacionais ou estratégicas' },
-  { key: 'q7', label: 'Q7 - Quais ajustes são recomendados no processo de realização deste benefício?', type: 'textarea', placeholder: 'Descrever ajustes recomendados' },
+  { key: 'q7', label: 'Q7 - Quais ajustes são recomendados no processo de realização deste benefício?', type: 'multiselect', options: ['Ajustar indicadores de medição', 'Revisar responsáveis', 'Ajustar estratégia de implementação', 'Revisar frequência de monitoramento', 'Redefinir escopo do benefício', 'Encerrar benefício', 'Escalar benefício para outras áreas', 'Outros'], justKey: 'q7_outros', justPlaceholder: 'Informar outros ajustes' },
 ];
 
 function BeneficioQuestionnaire({ beneficioId, questoesBenMap, onQuestoesBenChange }) {
@@ -480,6 +480,19 @@ function BeneficioQuestionnaire({ beneficioId, questoesBenMap, onQuestoesBenChan
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all hover:border-gray-400 resize-none" />
                     </div>
                   )}
+                </div>
+              ) : q.type === 'multiselect' ? (
+                <div className="ml-10">
+                  <MultiSelectChips
+                    value={data[q.key]}
+                    options={q.options}
+                    onChange={(v) => set(q.key, v)}
+                    colorScheme="blue"
+                    justKey={q.justKey}
+                    justValue={data[q.justKey]}
+                    onJustChange={(v) => set(q.justKey, v)}
+                    justPlaceholder={q.justPlaceholder}
+                  />
                 </div>
               ) : (
                 <div className="ml-10">
@@ -559,17 +572,80 @@ const PROPAGACAO_QUESTIONS = [
   { key: 'q7', label: 'Q7 - Principais fatores que explicam a diferença entre propagação prevista e realizada', type: 'textarea', placeholder: 'Descrever fatores' },
   { key: 'q8', label: 'Q8 - Quais mecanismos têm favorecido ou dificultado a propagação?', type: 'textarea', placeholder: 'Descrever mecanismos' },
   { key: 'q9', label: 'Q9 - Foram identificados efeitos indiretos decorrentes da propagação?', type: 'select', options: ['Não foram identificados', 'Sim, efeitos indiretos positivos', 'Sim, efeitos indiretos negativos', 'Sim, efeitos indiretos positivos e negativos'], justKey: 'q9_detalhamento', justPlaceholder: 'Descrever os efeitos indiretos observados' },
-  { key: 'q10', label: 'Q10 - Quais ajustes são recomendados para ampliar, estabilizar ou controlar a propagação?', type: 'textarea', placeholder: 'Descrever ajustes recomendados' },
+  { key: 'q10', label: 'Q10 - Quais ajustes são recomendados para ampliar, estabilizar ou controlar a propagação?', type: 'multiselect', options: ['Reforçar comunicação do benefício', 'Ampliar treinamento e capacitação', 'Envolver lideranças-chave', 'Ajustar processos relacionados', 'Rever público-alvo da propagação', 'Monitorar efeitos colaterais com maior frequência', 'Outros'], justKey: 'q10_outros', justPlaceholder: 'Informar outros ajustes' },
 ];
 
 const SINERGIA_QUESTIONS = [
   { key: 'q1', label: 'Q1 - Este benefício apresenta relação de reforço, complementaridade ou dependência com outros?', type: 'select', options: ['Não apresentam relação relevante', 'Apresentam dependência'], justKey: 'q1_beneficio', justPlaceholder: 'Benefício relacionado' },
-  { key: 'q2', label: 'Q2 - Principais tipos de relação deste benefício com os demais', type: 'textarea', placeholder: 'Ex: Reforço, Complementaridade, Dependência funcional, Estrutural, Sequencial...' },
+  { key: 'q2', label: 'Q2 - Informar os principais tipos de relação deste benefício com os demais benefícios do projeto', type: 'multiselect', options: ['Reforço', 'Complementaridade', 'Dependência funcional', 'Estrutural', 'Sequencial', 'Escala', 'Dinâmica', 'Emergente', 'Evolutiva', 'Ambiental', 'Antagônica', 'Outros'], justKey: 'q2_outros', justPlaceholder: 'Informar outras relações' },
   { key: 'q3', label: 'Q3 - Intensidade da sinergia do benefício com a criação do valor', type: 'select', options: ['Muito baixa', 'Baixa', 'Equilibrado', 'Alta', 'Muito alta', 'Outro tipo de intensidade'], justKey: 'q3_outros', justPlaceholder: 'Informar outra intensidade' },
   { key: 'q4', label: 'Q4 - Foram identificados conflitos, sobreposições ou competição entre benefícios?', type: 'select', options: ['Sim', 'Não'], justKey: 'q4_detalhamento', justPlaceholder: 'Se sim, descrever conflitos ou sobreposições' },
   { key: 'q5', label: 'Q5 - Há novos benefícios emergentes ou relações não mapeadas anteriormente?', type: 'select', options: ['Sim', 'Não'], justKey: 'q5_detalhamento', justPlaceholder: 'Se sim, informar novos benefícios ou relações' },
-  { key: 'q6', label: 'Q6 - Quais ajustes são recomendados para fortalecer as sinergias e reduzir perdas?', type: 'textarea', placeholder: 'Descrever ajustes recomendados' },
+  { key: 'q6', label: 'Q6 - Quais ajustes são recomendados para fortalecer as sinergias e reduzir perdas?', type: 'multiselect', options: ['Alinhar metas e indicadores entre benefícios', 'Integrar responsáveis pelas entregas', 'Ajustar prioridades de execução', 'Rever dependências entre benefícios', 'Incorporar novos benefícios ao mapa', 'Monitorar sinergias com maior frequência', 'Outros'], justKey: 'q6_outros', justPlaceholder: 'Informar outros ajustes' },
 ];
+
+function MultiSelectChips({ value, options, onChange, colorScheme, justKey, justValue, onJustChange, justPlaceholder }) {
+  const selected = Array.isArray(value) ? value : (value ? value.split('|||') : []);
+  const toggle = (opt) => {
+    const next = selected.includes(opt) ? selected.filter(s => s !== opt) : [...selected, opt];
+    onChange(next.length > 0 ? next.join('|||') : '');
+  };
+  const chipColors = {
+    orange: { active: 'bg-orange-100 text-orange-800 border-orange-300 shadow-orange-100', inactive: 'bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:bg-orange-50' },
+    purple: { active: 'bg-purple-100 text-purple-800 border-purple-300 shadow-purple-100', inactive: 'bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:bg-purple-50' },
+    blue: { active: 'bg-blue-100 text-blue-800 border-blue-300 shadow-blue-100', inactive: 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50' },
+  };
+  const cc = chipColors[colorScheme] || chipColors.blue;
+  const showOthers = options.includes('Outros') && selected.includes('Outros');
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt, i) => {
+          const isActive = selected.includes(opt);
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => toggle(opt)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150 cursor-pointer ${isActive ? cc.active + ' shadow-sm' : cc.inactive}`}
+            >
+              <span className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${isActive ? 'bg-current border-current' : 'border-gray-300'}`}>
+                {isActive && (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="white" className="w-3 h-3">
+                    <path fillRule="evenodd" d="M12.416 3.376a.75.75 0 01.208 1.04l-5 7.5a.75.75 0 01-1.154.114l-3-3a.75.75 0 011.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 011.04-.207z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </span>
+              {i + 1}. {opt}
+            </button>
+          );
+        })}
+      </div>
+      {selected.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-3 py-2 bg-gray-50 rounded-lg border border-gray-100">
+          <span className="text-xs text-gray-400 mr-1 self-center">Selecionados:</span>
+          {selected.map(s => (
+            <span key={s} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${cc.active} shadow-sm`}>
+              {s}
+              <button type="button" onClick={() => toggle(s)} className="ml-0.5 opacity-60 hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+                  <path d="M5.28 4.22a.75.75 0 00-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 101.06 1.06L8 9.06l2.72 2.72a.75.75 0 101.06-1.06L9.06 8l2.72-2.72a.75.75 0 00-1.06-1.06L8 6.94 5.28 4.22z" />
+                </svg>
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      {showOthers && justKey && (
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">{justPlaceholder || 'Especifique'}</label>
+          <textarea value={justValue || ''} onChange={(e) => onJustChange(e.target.value)} placeholder={justPlaceholder || 'Especifique...'} rows={2} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none transition-all hover:border-gray-400 resize-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+        </div>
+      )}
+    </div>
+  );
+}
 
 function GenericQuestionnaire({ entityId, questions, questionsMap, onQuestionsChange, title, colorScheme }) {
   const [open, setOpen] = useState(false);
@@ -622,6 +698,19 @@ function GenericQuestionnaire({ entityId, questions, questionsMap, onQuestionsCh
                       <textarea value={data[q.justKey] || ''} onChange={(e) => set(q.justKey, e.target.value)} placeholder={q.justPlaceholder || 'Justifique...'} rows={2} className={`w-full border border-gray-300 rounded-lg px-3 py-2 text-sm ${c.ring} outline-none transition-all hover:border-gray-400 resize-none`} />
                     </div>
                   )}
+                </div>
+              ) : q.type === 'multiselect' ? (
+                <div className="ml-10">
+                  <MultiSelectChips
+                    value={data[q.key]}
+                    options={q.options}
+                    onChange={(v) => set(q.key, v)}
+                    colorScheme={colorScheme}
+                    justKey={q.justKey}
+                    justValue={data[q.justKey]}
+                    onJustChange={(v) => set(q.justKey, v)}
+                    justPlaceholder={q.justPlaceholder}
+                  />
                 </div>
               ) : q.type === 'number' ? (
                 <div className="ml-10 max-w-xs">
