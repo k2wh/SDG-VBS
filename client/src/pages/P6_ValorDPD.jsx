@@ -68,6 +68,41 @@ const salienciaScaleOptions = [
   { value: 5, label: '5 - Muito alta' },
 ];
 
+const PLU_DESCRIPTIONS = {
+  Poder: 'Considerando sua percepção geral, em que medida este stakeholder possui capacidade de influenciar recursos estratégicos, decisões críticas, governança e resultados do projeto, incluindo a possibilidade de acelerar, bloquear ou redirecionar iniciativas relacionadas aos valor e aos benefícios?',
+  Legitimidade: 'Considerando sua percepção geral, em que medida as expectativas, demandas e participação deste stakeholder são apropriadas, tecnicamente relevantes, institucionalmente reconhecidas, alinhadas às normas e estratégias organizacionais e socialmente aceitas no contexto do projeto?',
+  Urgência: 'Considerando sua percepção geral, em que medida as demandas deste stakeholder exigem atenção imediata, exercem pressão significativa nos prazos e necessitam ação rápida para evitar impactos relevantes, riscos ou conflitos no curto prazo?',
+};
+
+function PLUInfoModal({ field, onClose }) {
+  if (!field) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-800">{field}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+        </div>
+        <p className="text-gray-600 leading-relaxed">{PLU_DESCRIPTIONS[field]}</p>
+        <div className="mt-6 flex justify-end">
+          <button onClick={onClose} className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">Entendi</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PLULabel({ label, onClick }) {
+  return (
+    <span className="flex items-center gap-1">
+      {label}
+      <button type="button" onClick={onClick} className="text-primary-500 hover:text-primary-700" title={`Saiba mais sobre ${label}`}>
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth="2"/><path strokeWidth="2" d="M12 16v-4M12 8h.01"/></svg>
+      </button>
+    </span>
+  );
+}
+
 export default function P6_ValorDPD({ projetoAtivo }) {
   const [lista, setLista] = useState([]);
   const [allStakeholders, setAllStakeholders] = useState([]);
@@ -83,6 +118,7 @@ export default function P6_ValorDPD({ projetoAtivo }) {
   const [linkPoder, setLinkPoder] = useState(1);
   const [linkLegitimidade, setLinkLegitimidade] = useState(1);
   const [linkUrgencia, setLinkUrgencia] = useState(1);
+  const [pluModal, setPluModal] = useState(null);
 
   const load = () => {
     if (!projetoAtivo) return;
@@ -237,15 +273,15 @@ export default function P6_ValorDPD({ projetoAtivo }) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             <div>
-              <FormField label="Poder" type="select" value={linkPoder} onChange={(v) => setLinkPoder(Number(v))}
+              <FormField label={<PLULabel label="Poder" onClick={() => setPluModal('Poder')} />} type="select" value={linkPoder} onChange={(v) => setLinkPoder(Number(v))}
                 options={salienciaScaleOptions} />
             </div>
             <div>
-              <FormField label="Legitimidade" type="select" value={linkLegitimidade} onChange={(v) => setLinkLegitimidade(Number(v))}
+              <FormField label={<PLULabel label="Legitimidade" onClick={() => setPluModal('Legitimidade')} />} type="select" value={linkLegitimidade} onChange={(v) => setLinkLegitimidade(Number(v))}
                 options={salienciaScaleOptions} />
             </div>
             <div>
-              <FormField label="Urgência" type="select" value={linkUrgencia} onChange={(v) => setLinkUrgencia(Number(v))}
+              <FormField label={<PLULabel label="Urgência" onClick={() => setPluModal('Urgência')} />} type="select" value={linkUrgencia} onChange={(v) => setLinkUrgencia(Number(v))}
                 options={salienciaScaleOptions} />
             </div>
           </div>
@@ -259,9 +295,9 @@ export default function P6_ValorDPD({ projetoAtivo }) {
               <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Nome</th>
               <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Perspectiva</th>
               <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Classe</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase" title="Considerando sua percepção geral, em que medida este stakeholder possui capacidade de influenciar recursos estratégicos, decisões críticas, governança e resultados do projeto?">Poder</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase" title="Considerando sua percepção geral, em que medida as reivindicações deste stakeholder são percebidas como apropriadas, adequadas e desejáveis no contexto do projeto?">Legitimidade</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase" title="Considerando sua percepção geral, em que medida as demandas deste stakeholder exigem atenção imediata, exercem pressão significativa nos prazos?">Urgência</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase"><PLULabel label="Poder" onClick={() => setPluModal('Poder')} /></th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase"><PLULabel label="Legitimidade" onClick={() => setPluModal('Legitimidade')} /></th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase"><PLULabel label="Urgência" onClick={() => setPluModal('Urgência')} /></th>
               <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Saliência</th>
               <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Saliência Normalizada</th>
               <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">Ações</th>
@@ -294,6 +330,8 @@ export default function P6_ValorDPD({ projetoAtivo }) {
           <button onClick={() => setToast(null)} className="ml-2 text-gray-400 hover:text-gray-600">&times;</button>
         </div>
       )}
+
+      <PLUInfoModal field={pluModal} onClose={() => setPluModal(null)} />
 
       <ConfirmDialog open={!!deleteTarget} title="Excluir Valor" message={`Deseja excluir "${deleteTarget?.descricao}"?`}
         onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />
