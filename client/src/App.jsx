@@ -14,7 +14,16 @@ import P10_Revisoes from './pages/P10_Revisoes';
 import P11_Consolidacoes from './pages/P11_Consolidacoes';
 
 function App() {
-  const [projetoAtivo, setProjetoAtivo] = useState(null);
+  const [projetoAtivo, setProjetoAtivoState] = useState(() => {
+    const saved = localStorage.getItem('projetoAtivo');
+    return saved ? Number(saved) : null;
+  });
+
+  const setProjetoAtivo = (id) => {
+    setProjetoAtivoState(id);
+    if (id != null) localStorage.setItem('projetoAtivo', id);
+    else localStorage.removeItem('projetoAtivo');
+  };
 
   return (
     <BrowserRouter>
