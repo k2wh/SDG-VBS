@@ -75,11 +75,11 @@ router.get('/:id/stakeholders', (req, res) => {
 });
 
 router.put('/:beneficioId/stakeholders/:stakeholderId', (req, res) => {
-  const { poder, legitimidade, urgencia, classe_stakeholder } = req.body;
+  const { poder, legitimidade, urgencia, classe_stakeholder, descontinuado } = req.body;
   const saliencia = (poder || 0) * (legitimidade || 0) * (urgencia || 0);
   db.prepare(
-    'UPDATE beneficio_stakeholders SET poder=?, legitimidade=?, urgencia=?, saliencia=?, classe_stakeholder=? WHERE beneficio_id=? AND stakeholder_id=?'
-  ).run(poder || 0, legitimidade || 0, urgencia || 0, saliencia, classe_stakeholder || null, req.params.beneficioId, req.params.stakeholderId);
+    'UPDATE beneficio_stakeholders SET poder=?, legitimidade=?, urgencia=?, saliencia=?, classe_stakeholder=?, descontinuado=? WHERE beneficio_id=? AND stakeholder_id=?'
+  ).run(poder || 0, legitimidade || 0, urgencia || 0, saliencia, classe_stakeholder || null, descontinuado ? 1 : 0, req.params.beneficioId, req.params.stakeholderId);
   res.json({ success: true });
 });
 
@@ -98,11 +98,13 @@ router.post('/:id/recalcular-saliencia', (req, res) => {
     return { ...r, saliencia };
   });
 
-  const maxSaliencia = Math.max(...updated.map(r => r.saliencia), 1);
+  // Only consider active (not descontinuado) stakeholders for max
+  const activeRows = updated.filter(r => !r.descontinuado);
+  const maxSaliencia = Math.max(...activeRows.map(r => r.saliencia), 1);
 
   const updateStmt = db.prepare('UPDATE beneficio_stakeholders SET saliencia=?, saliencia_normalizada=? WHERE beneficio_id=? AND stakeholder_id=?');
   for (const r of updated) {
-    const saliencia_normalizada = r.saliencia / maxSaliencia;
+    const saliencia_normalizada = r.descontinuado ? 0 : r.saliencia / maxSaliencia;
     updateStmt.run(r.saliencia, saliencia_normalizada, req.params.id, r.stakeholder_id);
   }
 

@@ -126,6 +126,7 @@ export const revisoes = {
   getCiclo: (id) => request(`${API}/revisoes/${id}/ciclo`),
   salvarBloco: (id, data) => request(`${API}/revisoes/${id}/salvar-bloco`, { method: 'PATCH', body: JSON.stringify(data) }),
   atualizarSnapshot: (id) => request(`${API}/revisoes/${id}/atualizar-snapshot`, { method: 'PATCH' }),
+  updateDescricao: (id, descricao) => request(`${API}/revisoes/${id}/descricao`, { method: 'PATCH', body: JSON.stringify({ descricao }) }),
   getQuestoesValor: (id) => request(`${API}/revisoes/${id}/questoes-valor`),
   saveQuestoesValor: (id, valorId, data) => request(`${API}/revisoes/${id}/questoes-valor/${valorId}`, { method: 'PUT', body: JSON.stringify(data) }),
   getQuestoesBeneficio: (id) => request(`${API}/revisoes/${id}/questoes-beneficio`),

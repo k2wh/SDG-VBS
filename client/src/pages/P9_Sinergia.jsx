@@ -101,9 +101,9 @@ export default function P9_Sinergia({ projetoAtivo }) {
         </button>
       </div>
 
-      <FormModal open={showForm} onClose={closeModal} title={editId ? 'Editar Sinergia' : 'Nova Sinergia'} maxWidth="max-w-2xl">
+      <FormModal open={showForm} onClose={closeModal} title={editId ? 'Editar Sinergia' : 'Nova Sinergia'} maxWidth="max-w-4xl">
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <FormField label="Benefício A" type="select" value={form.beneficio_a_id} onChange={(v) => setForm({ ...form, beneficio_a_id: v })} options={beneficiosOpts} required searchable />
             <FormField label="Benefício B" type="select" value={form.beneficio_b_id} onChange={(v) => setForm({ ...form, beneficio_b_id: v })} options={beneficiosOpts} required searchable />
             <FormField label="Tipo de Relação" type="select" value={form.tipo_relacao} onChange={(v) => setForm({ ...form, tipo_relacao: v })}

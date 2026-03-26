@@ -151,10 +151,12 @@ export default function P4_Projetos({ setProjetoAtivo }) {
 
       <FormModal open={!!showEventos} onClose={closeEventosModal} title={`Eventos do Projeto — ${lista.find(p => p.id === showEventos)?.nome || ''}`} maxWidth="max-w-4xl">
         <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
             <FormField label="Data" type="date" value={eventoForm.data_evento} onChange={(v) => setEventoForm({ ...eventoForm, data_evento: v })} required />
             <FormField label="Tipo" type="select" value={eventoForm.tipo_evento} onChange={(v) => setEventoForm({ ...eventoForm, tipo_evento: v })} options={tipoEventoOpts} />
             <FormField label="Título" value={eventoForm.titulo} onChange={(v) => setEventoForm({ ...eventoForm, titulo: v })} required />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 items-end">
             <FormField label="Responsável" type="select" value={eventoForm.responsavel_id} onChange={(v) => setEventoForm({ ...eventoForm, responsavel_id: v })} options={gestoresOpts} searchable />
           </div>
           <div className="mt-3">

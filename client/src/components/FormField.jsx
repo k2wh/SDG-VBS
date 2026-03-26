@@ -306,7 +306,7 @@ export default function FormField({ label, type = 'text', value, onChange, optio
     return (
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</label>
-        <textarea value={value || ''} onChange={(e) => handleChange(e.target.value)} className={baseClass} placeholder={placeholder} required={required} rows={rows || 3} />
+        <textarea value={value || ''} onChange={(e) => handleChange(e.target.value)} className={`${baseClass} resize-y`} placeholder={placeholder} required={required} rows={rows || 3} />
       </div>
     );
   }

@@ -17,6 +17,15 @@ const BLOCK_TABS = [
 
 const PLU_OPTIONS = [1, 2, 3, 4, 5];
 
+function recalcNormLocal(list) {
+  const active = list.filter(s => !s.descontinuado);
+  const maxSal = Math.max(...active.map(s => (s.poder || 1) * (s.legitimidade || 1) * (s.urgencia || 1)), 1);
+  return list.map(s => ({
+    ...s,
+    saliencia_normalizada: s.descontinuado ? 0 : ((s.poder || 1) * (s.legitimidade || 1) * (s.urgencia || 1)) / maxSal
+  }));
+}
+
 function SalienciaSelect({ value, onChange }) {
   return (
     <select
@@ -82,11 +91,15 @@ function ExpandableStakeholders({
     const next = stakeholdersList.map((s) =>
       (s.id === updated.id && s.stakeholder_id === updated.stakeholder_id) ? updated : s
     );
-    onStakeholdersChange(parentId, next);
+    onStakeholdersChange(parentId, recalcNormLocal(next));
   };
 
   const handleToggleDescontinuado = (sh) => {
-    handleUpdate({ ...sh, descontinuado: !sh.descontinuado });
+    const updated = { ...sh, descontinuado: !sh.descontinuado };
+    const next = stakeholdersList.map((s) =>
+      (s.id === updated.id && s.stakeholder_id === updated.stakeholder_id) ? updated : s
+    );
+    onStakeholdersChange(parentId, recalcNormLocal(next));
   };
 
   const handleAddStakeholder = () => {
@@ -98,17 +111,21 @@ function ExpandableStakeholders({
       stakeholder_id: found.id,
       nome: found.nome,
       stakeholder_nome: found.nome,
-      classe: found.classe || '',
+      classe: found.classe_principal || found.classe || '',
       poder: 1,
       legitimidade: 1,
       urgencia: 1,
       saliencia_normalizada: null,
       descontinuado: false,
     };
-    onStakeholdersChange(parentId, [...stakeholdersList, newEntry]);
+    onStakeholdersChange(parentId, recalcNormLocal([...stakeholdersList, newEntry]));
     setNewShId('');
     setAdding(false);
   };
+
+  const availableStakeholders = allStakeholders.filter(
+    (s) => !stakeholdersList.some((existing) => existing.stakeholder_id === s.id)
+  );
 
   return (
     <div className="mt-1 mb-2">
@@ -161,7 +178,7 @@ function ExpandableStakeholders({
                   className="border border-gray-300 rounded px-2 py-1 text-sm flex-1 focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">Selecione um stakeholder...</option>
-                  {allStakeholders.map((s) => (
+                  {availableStakeholders.map((s) => (
                     <option key={s.id} value={s.id}>{s.nome}</option>
                   ))}
                 </select>
@@ -172,10 +189,14 @@ function ExpandableStakeholders({
                   Cancelar
                 </button>
               </>
-            ) : (
+            ) : availableStakeholders.length > 0 ? (
               <button onClick={() => setAdding(true)} className="text-primary-600 hover:text-primary-800 text-xs font-medium">
                 + Adicionar Stakeholder
               </button>
+            ) : allStakeholders.length === 0 ? (
+              <span className="text-xs text-gray-400">Vincule stakeholders ao projeto na etapa 5 primeiro.</span>
+            ) : (
+              <span className="text-xs text-gray-400">Todos os stakeholders do projeto já estão vinculados.</span>
             )}
           </div>
         </div>
@@ -855,6 +876,30 @@ function CycleEditorModal({ revId, onClose, onReload }) {
 
   const handleRecalcular = async (id, type) => {
     try {
+      const key = `${type === 'valor' ? 'valor' : 'beneficio'}_${id}`;
+      const shs = stakeholdersMap[key] || [];
+      const api = type === 'valor' ? valores : beneficios;
+
+      // Save all stakeholders (new and existing) before recalculating
+      for (const sh of shs) {
+        if (String(sh.id).startsWith('new_') && sh.stakeholder_id) {
+          await api.addStakeholder(id, {
+            stakeholder_id: sh.stakeholder_id,
+            poder: sh.poder,
+            legitimidade: sh.legitimidade,
+            urgencia: sh.urgencia,
+          });
+        } else if (sh.stakeholder_id) {
+          await api.updateStakeholder(id, sh.stakeholder_id, {
+            poder: sh.poder,
+            legitimidade: sh.legitimidade,
+            urgencia: sh.urgencia,
+            descontinuado: sh.descontinuado || false,
+          });
+        }
+      }
+
+      // Now recalculate saliência normalizada on server
       if (type === 'valor') {
         await valores.recalcularSaliencia(id);
       } else {
@@ -1107,6 +1152,8 @@ export default function P10_Revisoes({ projetoAtivo }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [cicloRevId, setCicloRevId] = useState(null);
   const [exportingId, setExportingId] = useState(null);
+  const [editingDescId, setEditingDescId] = useState(null);
+  const [editDescText, setEditDescText] = useState('');
 
   const handleExportXlsx = async (rev) => {
     setExportingId(rev.id);
@@ -1189,7 +1236,36 @@ export default function P10_Revisoes({ projetoAtivo }) {
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-800 text-sm leading-tight">{rev.nome_arquivo}</h4>
-                      {rev.descricao && <p className="text-xs text-gray-500 mt-0.5">{rev.descricao}</p>}
+                      {editingDescId === rev.id ? (
+                        <div className="flex items-center gap-2 mt-1">
+                          <input
+                            type="text"
+                            value={editDescText}
+                            onChange={(e) => setEditDescText(e.target.value)}
+                            className="border border-gray-300 rounded px-2 py-0.5 text-xs flex-1 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                revisoes.updateDescricao(rev.id, editDescText).then(() => { load(); setEditingDescId(null); });
+                              } else if (e.key === 'Escape') {
+                                setEditingDescId(null);
+                              }
+                            }}
+                          />
+                          <button onClick={() => { revisoes.updateDescricao(rev.id, editDescText).then(() => { load(); setEditingDescId(null); }); }} className="text-green-600 hover:text-green-800 text-xs font-medium">Salvar</button>
+                          <button onClick={() => setEditingDescId(null)} className="text-gray-400 hover:text-gray-600 text-xs">Cancelar</button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <p className="text-xs text-gray-500">{rev.descricao || '(sem descrição)'}</p>
+                          <button onClick={() => { setEditingDescId(rev.id); setEditDescText(rev.descricao || ''); }} className="text-gray-400 hover:text-primary-600" title="Editar descrição">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+                              <path d="M13.488 2.513a1.75 1.75 0 00-2.475 0L6.75 6.774a2.75 2.75 0 00-.596.892l-.848 2.047a.75.75 0 00.98.98l2.047-.848a2.75 2.75 0 00.892-.596l4.261-4.262a1.75 1.75 0 000-2.474z" />
+                              <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0114 9v2.25A2.75 2.75 0 0111.25 14h-6.5A2.75 2.75 0 012 11.25v-6.5A2.75 2.75 0 014.75 2H7a.75.75 0 010 1.5H4.75z" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${

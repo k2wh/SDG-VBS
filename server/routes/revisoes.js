@@ -76,6 +76,12 @@ router.post('/projeto/:projetoId', (req, res) => {
   res.status(201).json({ id: result.lastInsertRowid, nome_arquivo: nomeArquivo, data_revisao: dataRevisao, status: 'Aberto' });
 });
 
+router.patch('/:id/descricao', (req, res) => {
+  const { descricao } = req.body;
+  db.prepare('UPDATE revisoes SET descricao = ? WHERE id = ?').run(descricao || '', req.params.id);
+  res.json({ success: true });
+});
+
 router.patch('/:id/encerrar', (req, res) => {
   const rev = db.prepare('SELECT * FROM revisoes WHERE id = ?').get(req.params.id);
   if (!rev) return res.status(404).json({ error: 'Não encontrado' });

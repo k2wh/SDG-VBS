@@ -5,7 +5,7 @@ import DataTable from '../components/DataTable';
 import ConfirmDialog from '../components/ConfirmDialog';
 import FormModal from '../components/FormModal';
 import EmptyState from '../components/EmptyState';
-import { beneficios, valores, gestores as gestoresApi, stakeholders as stakeholdersApi } from '../services/api';
+import { beneficios, valores, gestores as gestoresApi, stakeholders as stakeholdersApi, projetos } from '../services/api';
 
 const empty = { valor_id: '', descricao: '', natureza: '', classe: '', temporalidade: '', responsavel_id: '', forma_avaliacao: '', riscos: '', quando_realizar: '', como_realizar: '', frequencia_revisao: '', proxima_revisao: '', status_realizacao: 'Planejado', classe_conflito: '', probabilidade_risco: '' };
 
@@ -62,6 +62,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
   const [linkUrgencia, setLinkUrgencia] = useState(1);
   const [linkClasseSH, setLinkClasseSH] = useState('');
   const [pluModal, setPluModal] = useState(null);
+  const [projetoData, setProjetoData] = useState(null);
 
   const load = () => {
     if (!projetoAtivo) return;
@@ -69,6 +70,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
     valores.listByProjeto(projetoAtivo).then(setValoresList);
     gestoresApi.list().then(setGestoresList);
     stakeholdersApi.list().then(setAllStakeholders);
+    projetos.get(projetoAtivo).then(setProjetoData);
   };
   useEffect(() => { load(); }, [projetoAtivo]);
 
@@ -226,7 +228,7 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
       <StepHeader numero={7} titulo="GADB Benefícios" descricao="Identificação e definição dos benefícios" />
 
       <div className="mb-4 flex justify-end">
-        <button onClick={() => { setEditId(null); setForm({ ...empty }); setShowForm(true); }}
+        <button onClick={() => { setEditId(null); setForm({ ...empty, frequencia_revisao: projetoData?.frequencia_revisoes || '' }); setShowForm(true); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
           + Novo Benefício
         </button>
@@ -240,10 +242,10 @@ export default function P7_BeneficiosGADB({ projetoAtivo }) {
             <FormField label="Natureza" type="select" value={form.natureza} onChange={(v) => setForm({ ...form, natureza: v })} options={naturezaOpts} />
             <FormField label="Classe de benefícios" type="select" value={form.classe} onChange={(v) => setForm({ ...form, classe: v })} options={classeOpts} />
             <FormField label="Classe de conflito" type="select" value={form.classe_conflito} onChange={(v) => setForm({ ...form, classe_conflito: v })} options={classeConflitoOpts} />
-            <FormField label="Temporalidade" value={form.temporalidade} onChange={(v) => setForm({ ...form, temporalidade: v })} />
+            <FormField label="Temporalidade / evolução" value={form.temporalidade} onChange={(v) => setForm({ ...form, temporalidade: v })} />
             <FormField label="Responsável" type="select" value={form.responsavel_id} onChange={(v) => setForm({ ...form, responsavel_id: v })} options={gestoresOpts} searchable />
             <FormField label="Como será realizado" type="textarea" value={form.como_realizar} onChange={(v) => setForm({ ...form, como_realizar: v })} maxLength={200} rows={2} />
-            <FormField label="Como identificar / medir" value={form.forma_avaliacao} onChange={(v) => setForm({ ...form, forma_avaliacao: v })} maxLength={200} />
+            <FormField label="Como identificar / medir" type="textarea" value={form.forma_avaliacao} onChange={(v) => setForm({ ...form, forma_avaliacao: v })} maxLength={200} rows={2} />
             <FormField label="Status" type="select" value={form.status_realizacao} onChange={(v) => setForm({ ...form, status_realizacao: v })}
               options={[{ value: 'Planejado', label: 'Planejado' }, { value: 'Em Andamento', label: 'Em Andamento' }, { value: 'Realizado', label: 'Realizado' }, { value: 'Nao Realizado', label: 'Não Realizado' }]} />
             <FormField label="Quando realizar (meses)" type="number" value={form.quando_realizar} onChange={(v) => setForm({ ...form, quando_realizar: v })} />

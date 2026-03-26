@@ -113,6 +113,7 @@ CREATE TABLE IF NOT EXISTS valor_stakeholders (
   urgencia INTEGER DEFAULT 1,
   saliencia INTEGER DEFAULT 1,
   saliencia_normalizada REAL DEFAULT 0,
+  descontinuado INTEGER DEFAULT 0,
   criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(valor_id, stakeholder_id)
 );
@@ -151,6 +152,7 @@ CREATE TABLE IF NOT EXISTS beneficio_stakeholders (
   urgencia INTEGER DEFAULT 1,
   saliencia INTEGER DEFAULT 1,
   saliencia_normalizada REAL DEFAULT 0,
+  descontinuado INTEGER DEFAULT 0,
   criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

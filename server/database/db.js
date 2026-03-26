@@ -17,6 +17,15 @@ const schemaPath = path.join(__dirname, 'schema.sql');
 const schema = fs.readFileSync(schemaPath, 'utf-8');
 db.exec(schema);
 
+// Migrations for existing databases
+const migrations = [
+  'ALTER TABLE valor_stakeholders ADD COLUMN descontinuado INTEGER DEFAULT 0',
+  'ALTER TABLE beneficio_stakeholders ADD COLUMN descontinuado INTEGER DEFAULT 0',
+];
+for (const sql of migrations) {
+  try { db.exec(sql); } catch (_) { /* column already exists */ }
+}
+
 // Seed admin user if no users exist
 const bcrypt = require('bcryptjs');
 const userCount = db.prepare('SELECT COUNT(*) as c FROM usuarios').get();

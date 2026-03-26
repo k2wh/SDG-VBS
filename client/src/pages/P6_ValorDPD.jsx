@@ -5,7 +5,7 @@ import DataTable from '../components/DataTable';
 import ConfirmDialog from '../components/ConfirmDialog';
 import FormModal from '../components/FormModal';
 import EmptyState from '../components/EmptyState';
-import { valores, stakeholders as stakeholdersApi } from '../services/api';
+import { valores, stakeholders as stakeholdersApi, projetos } from '../services/api';
 
 const empty = { descricao: '', tipo: '', natureza: '', temporalidade: '', conflitos: '', riscos: '', criterios_mensuracao: '', frequencia_revisao: '', proxima_revisao: '', classe_valor: '', classe_conflito: '', probabilidade_risco: '' };
 
@@ -120,11 +120,13 @@ export default function P6_ValorDPD({ projetoAtivo }) {
   const [linkLegitimidade, setLinkLegitimidade] = useState(1);
   const [linkUrgencia, setLinkUrgencia] = useState(1);
   const [pluModal, setPluModal] = useState(null);
+  const [projetoData, setProjetoData] = useState(null);
 
   const load = () => {
     if (!projetoAtivo) return;
     valores.listByProjeto(projetoAtivo).then(setLista);
     stakeholdersApi.list().then(setAllStakeholders);
+    projetos.get(projetoAtivo).then(setProjetoData);
   };
   useEffect(() => { load(); }, [projetoAtivo]);
 
@@ -201,7 +203,7 @@ export default function P6_ValorDPD({ projetoAtivo }) {
 
   const columns = [
     { key: 'descricao', label: 'Descrição do Valor' },
-    { key: 'tipo', label: 'Tipo' },
+    { key: 'tipo', label: 'Comentário' },
     { key: 'natureza', label: 'Natureza' },
     { key: 'temporalidade', label: 'Temporalidade', render: (v) => v ? <span className="bg-primary-100 text-primary-800 text-xs px-2 py-0.5 rounded-full">{v}</span> : '-' },
   ];
@@ -211,7 +213,7 @@ export default function P6_ValorDPD({ projetoAtivo }) {
       <StepHeader numero={6} titulo="DPD Valor" descricao="Diagnóstico e planejamento do valor" />
 
       <div className="mb-4 flex justify-end">
-        <button onClick={() => { setEditId(null); setForm({ ...empty }); setShowForm(true); }}
+        <button onClick={() => { setEditId(null); setForm({ ...empty, frequencia_revisao: projetoData?.frequencia_revisoes || '' }); setShowForm(true); }}
           className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
           + Novo Valor
         </button>
@@ -221,26 +223,36 @@ export default function P6_ValorDPD({ projetoAtivo }) {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-3"><FormField label="Descrição" value={form.descricao} onChange={(v) => setForm({ ...form, descricao: v })} required /></div>
-            <FormField label="Tipo" value={form.tipo} onChange={(v) => setForm({ ...form, tipo: v })} />
             <FormField label="Natureza" type="select" value={form.natureza} onChange={(v) => setForm({ ...form, natureza: v })}
               options={[{ value: 'Tangível', label: 'Tangível' }, { value: 'Intangível', label: 'Intangível' }]} />
             <FormField label="Classe de valor" type="select" value={form.classe_valor} onChange={(v) => setForm({ ...form, classe_valor: v })}
               options={classeValorOptions} />
-            <FormField label="Temporalidade" type="select" value={form.temporalidade} onChange={(v) => setForm({ ...form, temporalidade: v })}
+            <FormField label="Temporalidade / evolução" type="select" value={form.temporalidade} onChange={(v) => setForm({ ...form, temporalidade: v })}
               options={[{ value: 'Ex-ante', label: 'Ex-ante' }, { value: 'Emergente', label: 'Emergente' }, { value: 'Adaptativa', label: 'Adaptativa' }]} />
             <FormField label="Frequência de Revisão" value={form.frequencia_revisao} onChange={(v) => setForm({ ...form, frequencia_revisao: v })} placeholder="Ex: Mensal" />
             <FormField label="Próxima Revisão" type="date" value={form.proxima_revisao} onChange={(v) => setForm({ ...form, proxima_revisao: v })} />
-            <FormField label="Critérios de Mensuração" value={form.criterios_mensuracao} onChange={(v) => setForm({ ...form, criterios_mensuracao: v })} />
-            <FormField label="Probabilidade do risco" type="select" value={form.probabilidade_risco} onChange={(v) => setForm({ ...form, probabilidade_risco: v })}
-              options={probabilidadeRiscoOptions} />
+            {projetoData && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Projeto</label>
+                <div className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-600">
+                  {projetoData.codigo} – {projetoData.nome}
+                </div>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <FormField label="Possível conflito associado ao valor" type="textarea" value={form.conflitos} onChange={(v) => setForm({ ...form, conflitos: v })} rows={2} />
+            <FormField label="Critérios de Mensuração" type="textarea" value={form.criterios_mensuracao} onChange={(v) => setForm({ ...form, criterios_mensuracao: v })} rows={2} />
             <FormField label="Riscos (positivos ou negativos) associados à criação do valor" type="textarea" value={form.riscos} onChange={(v) => setForm({ ...form, riscos: v })} rows={2} />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <FormField label="Probabilidade do risco" type="select" value={form.probabilidade_risco} onChange={(v) => setForm({ ...form, probabilidade_risco: v })}
+              options={probabilidadeRiscoOptions} />
             <FormField label="Classe de conflito" type="select" value={form.classe_conflito} onChange={(v) => setForm({ ...form, classe_conflito: v })}
               options={classeConflitoOptions} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <FormField label="Possível conflito associado ao valor" type="textarea" value={form.conflitos} onChange={(v) => setForm({ ...form, conflitos: v })} rows={2} />
+            <FormField label="Comentário" type="textarea" value={form.tipo} onChange={(v) => setForm({ ...form, tipo: v })} rows={2} />
           </div>
           <div className="mt-4 flex justify-end gap-3">
             <button type="button" onClick={closeModal} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">Cancelar</button>
